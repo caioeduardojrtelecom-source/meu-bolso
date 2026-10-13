@@ -139,7 +139,7 @@
             </div>
         </section>
 
-        <!-- ABA 4: COFRINHO & INVESTIMENTOS -->
+        <!-- ABA 4: COFRINHO -->
         <section id="tab-cofrinho" class="space-y-6 hidden">
             <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-xl space-y-3">
                 <div class="flex justify-between items-start">
@@ -201,7 +201,7 @@
             </div>
         </section>
 
-        <!-- ABA 5: METAS FINANCEIRAS -->
+        <!-- ABA 5: METAS -->
         <section id="tab-metas" class="space-y-6 hidden">
             <button onclick="abrirModalMeta()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-bullseye text-lg"></i>
@@ -215,7 +215,7 @@
             </div>
         </section>
 
-        <!-- ABA 6: IA PROFISSIONAL -->
+        <!-- ABA 6: IA -->
         <section id="tab-ia" class="space-y-3 hidden flex flex-col h-[75vh]">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3 shrink-0">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
@@ -375,7 +375,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v17';
+        const STORAGE_KEY = 'meu-bolso-ai-v18';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
@@ -781,7 +781,7 @@
             renderizarCofrinho();
         }
 
-        // ---------- IA 100% INTELIGENTE E PRECISA ----------
+        // ---------- IA ROBUSTA E INTELIGENTE ----------
         function adicionarMensagem(texto, doUsuario) {
             const chat = document.getElementById('chat-mensagens');
             const div = document.createElement('div');
@@ -819,13 +819,12 @@
             const nomeMesStr = new Date(anoAlvo, mesAlvo - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
             const totais = calcularTotaisMes(anoAlvo, mesAlvo);
 
-            // Se o usuário configurar a chave da API, a IA responde com nível máximo de consultoria
             if (estado.apiKey) {
                 try {
                     const contexto = `Você é um consultor financeiro pessoal especialista e empático. Caio está consultando o mês de ${nomeMesStr}. 
-                    Dados financeiros do mês: Renda Total = R$ ${totais.rendaTotalMes.toFixed(2)}, Dívidas Fixas = R$ ${totais.totalFixos.toFixed(2)}, Gastos Variáveis = R$ ${totais.totalVariavel.toFixed(2)}, Saldo Livre = R$ ${totais.saldo.toFixed(2)}. 
-                    Metas do usuário: ${JSON.stringify(estado.metas)}.
-                    Responda à pergunta do Caio ("${pergunta}") de forma direta, analítica e calculada em português.`;
+                    Dados financeiros do mês: Renda Total = R$ ${totais.rendaTotalMes.toFixed(2)}, Dívidas Fixas = R$ ${totais.totalFixos.toFixed(2)}, Saldo Livre = R$ ${totais.saldo.toFixed(2)}. 
+                    Metas: ${JSON.stringify(estado.metas)}.
+                    Responda à pergunta ("${pergunta}") de forma direta, analítica e calculada em português.`;
 
                     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                         method: 'POST',
@@ -843,27 +842,28 @@
                 } catch (e) { console.error(e); }
             }
 
-            // Calculadora Matemática Local Inteligente
+            // Calculadora Matemática Aprimorada (Reconhece "mil", "k", "15000")
             setTimeout(() => {
                 let resposta = "";
-                const numerosMatch = pergunta.match(/\d+([.,]\d+)?/g);
-                const valorCitado = numerosMatch ? parseFloat(numerosMatch[numerosMatch.length - 1].replace(',', '.')) : 0;
+                let valorAlvo = 0;
 
-                if (pLower.includes('juntar') || pLower.includes('guardar') || pLower.includes('meta') || pLower.includes('carro')) {
-                    const alvo = valorCitado > 0 ? valorCitado : 15000;
+                if (pLower.includes('15 mil') || pLower.includes('15k')) valorAlvo = 15000;
+                else if (pLower.includes('10 mil') || pLower.includes('10k')) valorAlvo = 10000;
+                else if (pLower.includes('20 mil') || pLower.includes('20k')) valorAlvo = 20000;
+                else if (pLower.includes('5 mil') || pLower.includes('5k')) valorAlvo = 5000;
+                else {
+                    const matchNum = pLower.match(/\d+([.,\d]*)?/);
+                    if (matchNum) valorAlvo = parseFloat(matchNum[0].replace('.', '').replace(',', '.'));
+                }
+
+                if (valorAlvo === 0) valorAlvo = 15000; // Padrão caso cite apenas "juntar dinheiro"
+
+                if (pLower.includes('juntar') || pLower.includes('guardar') || pLower.includes('meta') || pLower.includes('maneira') || pLower.includes('quanto')) {
                     const mesesMeta = 12;
-                    const necessarioMes = alvo / mesesMeta;
-                    resposta = `Para juntar ${formatarMoeda(alvo)} em ${mesesMeta} meses, você precisará guardar exatamente ${formatarMoeda(necessarioMes)} por mês. Em ${nomeMesStr}, seu saldo livre é de ${formatarMoeda(totais.saldo)}. ${totais.saldo >= necessarioMes ? 'Excelente! O seu saldo cobre essa meta folgadamente.' : 'Atenção: o valor necessário é superior ao seu saldo livre atual, vale a pena rever os gastos ou esticar o prazo.'}`;
+                    const necessarioMes = valorAlvo / mesesMeta;
+                    resposta = `Para juntar ${formatarMoeda(valorAlvo)} em ${mesesMeta} meses, a melhor maneira é separar exatamente ${formatarMoeda(necessarioMes)} todos os meses. Em ${nomeMesStr}, o seu saldo livre é de ${formatarMoeda(totais.saldo)}. ${totais.saldo >= necessarioMes ? 'Excelente! O seu saldo livre atual é suficiente para cobrir esse valor com folga.' : 'Atenção: o valor necessário por mês supera o seu saldo livre atual, portanto será necessário otimizar alguns gastos.'}`;
                 } else if (pLower.includes('gastar') || pLower.includes('comprar') || pLower.includes('posso')) {
-                    if (valorCitado > 0) {
-                        if (totais.saldo >= valorCitado) {
-                            resposta = `Sim! Em ${nomeMesStr} o seu saldo livre é de ${formatarMoeda(totais.saldo)}. Gastando ${formatarMoeda(valorCitado)}, você ainda terminará o mês com ${formatarMoeda(totais.saldo - valorCitado)} livres.`;
-                        } else {
-                            resposta = `Cuidado! Em ${nomeMesStr} você tem ${formatarMoeda(totais.saldo)} de saldo livre. Gastar ${formatarMoeda(valorCitado)} vai deixar você no vermelho em ${formatarMoeda(valorCitado - totais.saldo)}.`;
-                        }
-                    } else {
-                        resposta = `No mês de ${nomeMesStr}, sua renda é ${formatarMoeda(totais.rendaTotalMes)}, com dívidas de ${formatarMoeda(totais.totalFixos)} e saldo livre de ${formatarMoeda(totais.saldo)}.`;
-                    }
+                    resposta = `No mês de ${nomeMesStr}, sua renda é ${formatarMoeda(totais.rendaTotalMes)}, com dívidas de ${formatarMoeda(totais.totalFixos)} e saldo livre de ${formatarMoeda(totais.saldo)}.`;
                 } else {
                     resposta = `Para ${nomeMesStr}: Renda total ${formatarMoeda(totais.rendaTotalMes)}, Dívidas fixas ${formatarMoeda(totais.totalFixos)} e Saldo livre de ${formatarMoeda(totais.saldo)}. Como posso te ajudar a planejar?`;
                 }
