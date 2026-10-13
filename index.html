@@ -211,8 +211,8 @@
         </section>
 
         <!-- ABA 5: ASSISTENTE DE IA -->
-        <section id="tab-ia" class="space-y-4 hidden flex flex-col h-[75vh]">
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3">
+        <section id="tab-ia" class="space-y-3 hidden flex flex-col h-[75vh]">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3 shrink-0">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
                     <i class="fa-solid fa-robot"></i>
                 </div>
@@ -231,12 +231,13 @@
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2">
-                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar no mês?" class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 transition">
+            <!-- Caixa de envio corrigida -->
+            <div class="flex items-center space-x-2 shrink-0 pt-2">
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar no mês?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 transition">
                 <button onclick="alternarMicrofone()" id="btn-microfone" title="Falar" class="w-12 h-12 shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl flex items-center justify-center transition">
                     <i class="fa-solid fa-microphone text-sm"></i>
                 </button>
-                <button onclick="enviarMensagemIA()" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-2xl flex items-center justify-center font-bold transition shadow-lg shadow-emerald-500/20">
+                <button onclick="enviarMensagemIA()" class="w-12 h-12 shrink-0 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-2xl flex items-center justify-center font-bold transition shadow-lg shadow-emerald-500/20">
                     <i class="fa-solid fa-paper-plane text-sm"></i>
                 </button>
             </div>
@@ -365,14 +366,12 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v4';
+        const STORAGE_KEY = 'meu-bolso-ai-v5';
         const TAXAS_BANCO = { nubank: 0.1065, itau: 0.06, tesouro: 0.1075, personalizado: 0.12 };
         const CORES = ['#f59e0b', '#f43f5e', '#10b981', '#6366f1', '#06b6d4', '#a855f7', '#ec4899', '#84cc16'];
 
         let estado = carregarEstado();
         let grafico = null;
-
-        // Estado do Calendário (Ano e Mês exibidos atualmente)
         let dataVisualizacaoCalendario = new Date();
 
         function carregarEstado() {
@@ -407,7 +406,6 @@
         function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        // ---------- Cálculos ----------
         function calcularTotais() {
             const hoje = new Date();
             const anoAtual = hoje.getFullYear();
@@ -457,7 +455,6 @@
             return { total, investido, juros: total - investido, rendimentoMes: total * taxaMensal, taxaAnual };
         }
 
-        // ---------- Navegação ----------
         function mudarAba(aba) {
             ['dashboard', 'transacoes', 'fixos', 'cofrinho', 'ia'].forEach(nome => {
                 document.getElementById('tab-' + nome).classList.toggle('hidden', nome !== aba);
@@ -469,7 +466,6 @@
             window.scrollTo(0, 0);
         }
 
-        // ---------- Transações ----------
         function abrirModalTransacao() {
             document.getElementById('trans-desc').value = '';
             document.getElementById('trans-valor').value = '';
@@ -485,10 +481,7 @@
             const valor = parseFloat(document.getElementById('trans-valor').value);
             const data = document.getElementById('trans-data').value || hojeIso();
             const categoria = document.getElementById('trans-categoria').value;
-            if (!desc || !(valor > 0)) {
-                alert('Preencha a descrição e um valor maior que zero.');
-                return;
-            }
+            if (!desc || !(valor > 0)) { alert('Preencha a descrição e um valor maior que zero.'); return; }
             estado.transacoes.push({ id: Date.now(), desc, valor, data, categoria });
             salvarEstado();
             fecharModalTransacao();
@@ -502,7 +495,6 @@
             renderizarTudo();
         }
 
-        // ---------- Gastos Fixos ----------
         function abrirModalGastoFixo() {
             ['fixo-desc', 'fixo-valor', 'fixo-dia', 'fixo-parcelas'].forEach(id => document.getElementById(id).value = '');
             abrirModal('modal-fixo');
@@ -516,14 +508,7 @@
             const valor = parseFloat(document.getElementById('fixo-valor').value);
             const dia = parseInt(document.getElementById('fixo-dia').value, 10);
             const parcelas = parseInt(document.getElementById('fixo-parcelas').value, 10);
-            if (!desc || !(valor > 0)) {
-                alert('Preencha a descrição e um valor maior que zero.');
-                return;
-            }
-            if (dia && (dia < 1 || dia > 31)) {
-                alert('O dia do vencimento deve estar entre 1 e 31.');
-                return;
-            }
+            if (!desc || !(valor > 0)) { alert('Preencha a descrição e um valor maior que zero.'); return; }
             estado.fixos.push({ id: Date.now(), desc, valor, dia: dia || null, parcelas: parcelas > 0 ? parcelas : null });
             salvarEstado();
             fecharModalGastoFixo();
@@ -537,7 +522,6 @@
             renderizarTudo();
         }
 
-        // ---------- Cofrinho ----------
         function atualizarCofrinho() {
             estado.banco = document.getElementById('select-banco').value;
             estado.aporte = parseFloat(document.getElementById('input-aporte').value) || 0;
@@ -547,7 +531,6 @@
             renderizarCofrinho();
         }
 
-        // ---------- Configurações ----------
         function abrirConfiguracoes() {
             document.getElementById('config-nome').value = estado.nome || '';
             document.getElementById('config-renda').value = estado.renda || '';
@@ -561,10 +544,6 @@
             estado.nome = document.getElementById('config-nome').value.trim() || 'Caio';
             estado.renda = parseFloat(document.getElementById('config-renda').value) || 0;
             const diaPagamento = parseInt(document.getElementById('config-dia-pagamento').value, 10);
-            if (diaPagamento && (diaPagamento < 1 || diaPagamento > 31)) {
-                alert('O dia do pagamento deve estar entre 1 e 31.');
-                return;
-            }
             estado.diaPagamento = diaPagamento || null;
             salvarEstado();
             fecharConfiguracoes();
@@ -579,7 +558,6 @@
             renderizarTudo();
         }
 
-        // ---------- Calendário com Navegação de Meses ----------
         function mudarMesCalendario(direcao) {
             dataVisualizacaoCalendario.setMonth(dataVisualizacaoCalendario.getMonth() + direcao);
             renderizarCalendario();
@@ -587,8 +565,7 @@
 
         function renderizarCalendario() {
             const ano = dataVisualizacaoCalendario.getFullYear();
-            const mes = dataVisualizacaoCalendario.getMonth(); // 0 a 11
-            
+            const mes = dataVisualizacaoCalendario.getMonth();
             const nomeMes = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
             document.getElementById('txt-calendario-mes').textContent = nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1);
             
@@ -607,11 +584,8 @@
             for (let dia = 1; dia <= ultimoDiaMes; dia++) {
                 const ehHoje = dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear();
                 let classes = 'relative h-8 flex items-center justify-center rounded-lg ';
-                if (ehHoje) {
-                    classes += 'bg-emerald-500 text-slate-950 font-bold ';
-                } else {
-                    classes += 'text-slate-200 bg-slate-800/50 ';
-                }
+                if (ehHoje) classes += 'bg-emerald-500 text-slate-950 font-bold ';
+                else classes += 'text-slate-200 bg-slate-800/50 ';
                 if (dia === diaPagamentoMes) classes += 'ring-2 ring-sky-400 ';
                 const ponto = diasComVencimento.has(dia) ? '<span class="absolute bottom-0.5 w-1 h-1 rounded-full bg-amber-400"></span>' : '';
                 html += `<span class="${classes}">${dia}${ponto}</span>`;
@@ -629,7 +603,6 @@
                 : 'Informe o dia do pagamento nas configurações.';
         }
 
-        // ---------- Renderização Geral ----------
         function renderizarResumo() {
             const t = calcularTotais();
             const elSaldo = document.getElementById('txt-saldo');
@@ -684,7 +657,6 @@
 
         function renderizarExtrato() {
             const lista = document.getElementById('lista-extrato');
-            // Mostra todas as transações cadastradas ordenadas da mais recente para a mais antiga
             const transacoes = [...estado.transacoes].sort((a, b) => b.data.localeCompare(a.data) || b.id - a.id);
             document.getElementById('txt-qtd-transacoes').textContent = `${transacoes.length} registro${transacoes.length === 1 ? '' : 's'}`;
             if (!transacoes.length) {
@@ -742,18 +714,86 @@
             renderizarCofrinho();
         }
 
-        // ---------- Inicialização ----------
+        // ---------- Assistente de IA ----------
+        function adicionarMensagem(texto, doUsuario) {
+            const chat = document.getElementById('chat-mensagens');
+            const div = document.createElement('div');
+            div.className = doUsuario
+                ? 'bg-emerald-500 text-slate-950 text-xs p-3.5 rounded-2xl max-w-[85%] self-end leading-relaxed font-medium'
+                : 'bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed';
+            div.textContent = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function gerarResposta(pergunta) {
+            const p = pergunta.toLowerCase();
+            const t = calcularTotais();
+            const c = calcularCofrinho();
+            const nome = estado.nome || 'Caio';
+            const d = calcularDatas();
+
+            if (/(que dia|qual dia|data de hoje|hoje é|calend)/.test(p) && !/(receb|pagamento|salário|salario)/.test(p)) {
+                let resp = `Hoje é ${formatarData(d.hoje)}. Faltam ${d.diasRestantesMes} dias para acabar o mês.`;
+                if (d.proximoPagamento) resp += ` Seu próximo pagamento é ${formatarData(d.proximoPagamento, { weekday: 'long', day: 'numeric', month: 'long' })}, daqui a ${d.diasAtePagamento} dias.`;
+                return resp;
+            }
+            if (estado.renda <= 0) {
+                return `${nome}, informe sua renda mensal na engrenagem no topo da tela para eu calcular os valores.`;
+            }
+            if (/(receb|pagamento|salário|salario|pagar o mês|até o dia)/.test(p)) {
+                if (!d.proximoPagamento) return 'Informe o dia do pagamento nas configurações (engrenagem no topo) para eu calcular até quando o dinheiro dura.';
+                return `Seu próximo pagamento é dia ${d.proximoPagamento.getDate()}. Com ${formatarMoeda(t.saldo)} disponíveis, você tem média de ${formatarMoeda(t.saldo / (d.diasAtePagamento || 1))} por dia até lá.`;
+            }
+            if (/(posso gastar|disponível|disponivel|sobra|saldo|quanto tenho)/.test(p)) {
+                return `Olá ${nome}! Sua renda é ${formatarMoeda(estado.renda)}, os fixos somam ${formatarMoeda(t.totalFixos)} e os variáveis ${formatarMoeda(t.totalVariavel)}. Seu saldo livre atual é de ${formatarMoeda(t.saldo)}.`;
+            }
+            if (/(fixo|conta|vencimento|boleto)/.test(p)) {
+                return `Você tem ${estado.fixos.length} gastos fixos cadastrados, totalizando ${formatarMoeda(t.totalFixos)} por mês.`;
+            }
+            if (/(cofrinho|investi|rend|juros|guardar|poupar)/.test(p)) {
+                return `Guardando ${formatarMoeda(t.aporte)} por mês durante ${estado.meses} meses, seu cofrinho acumulado estimado será de ${formatarMoeda(c.total)} (${formatarMoeda(c.juros)} de juros).`;
+            }
+            return `Resumo para ${nome}: Renda ${formatarMoeda(estado.renda)}, Fixos ${formatarMoeda(t.totalFixos)}, Variáveis ${formatarMoeda(t.totalVariavel)}, Saldo livre ${formatarMoeda(t.saldo)}.`;
+        }
+
+        function enviarMensagemIA() {
+            const input = document.getElementById('input-pergunta-ia');
+            if (!input) return;
+            const pergunta = input.value.trim();
+            if (!pergunta) return;
+            adicionarMensagem(pergunta, true);
+            input.value = '';
+            setTimeout(() => {
+                const resposta = gerarResposta(pergunta);
+                adicionarMensagem(resposta, false);
+            }, 300);
+        }
+
+        // ---------- Eventos e Inicialização ----------
         document.getElementById('select-banco').value = estado.banco;
         document.getElementById('input-aporte').value = estado.aporte;
         document.getElementById('input-meses').value = estado.meses;
-        document.getElementById('input-pergunta-ia').addEventListener('keydown', e => {
-            if (e.key === 'Enter') enviarMensagemIA();
-        });
-        ['modal-transacao', 'modal-fixo', 'modal-config'].forEach(id => {
-            document.getElementById(id).addEventListener('click', e => {
-                if (e.target.id === id) fecharModal(id);
+
+        const inputIa = document.getElementById('input-pergunta-ia');
+        if (inputIa) {
+            inputIa.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    enviarMensagemIA();
+                }
             });
+        }
+
+        ['modal-transacao', 'modal-fixo', 'modal-config'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.addEventListener('click', e => {
+                    if (e.target.id === id) fecharModal(id);
+                });
+            }
         });
+
         renderizarTudo();
     </script>
 </body>
