@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meu Bolso AI - Controle Financeiro</title>
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.10/tailwindcss.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -165,7 +166,21 @@
             </div>
         </section>
 
-        <!-- ABA 5: IA (ESTILO ORIGINAL RESTAURADO) -->
+        <!-- ABA 5: METAS FINANCEIRAS -->
+        <section id="tab-metas" class="space-y-6 hidden">
+            <button onclick="abrirModalMeta()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-bullseye text-lg"></i>
+                <span>Criar Nova Meta Financeira</span>
+            </button>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+                <h3 class="font-bold text-sm text-slate-300">Minhas Metas e Objetivos</h3>
+                <div id="lista-metas" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
+                    <div class="text-center py-8 text-slate-500 text-sm">Nenhuma meta cadastrada.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 6: IA -->
         <section id="tab-ia" class="space-y-3 hidden flex flex-col h-[75vh]">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3 shrink-0">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
@@ -182,7 +197,7 @@
 
             <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
                 <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
-                    Olá, Caio! Já estou sincronizada com seus gastos. Pode me perguntar sobre seus gastos, calendário ou cofrinho!
+                    Olá, Caio! Já estou sincronizada com seus gastos. Pode me perguntar sobre seus gastos, calendário, cofrinho ou metas!
                 </div>
             </div>
 
@@ -211,12 +226,13 @@
         </div>
     </div>
 
-    <!-- Navegação Inferior -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40 max-w-md mx-auto">
+    <!-- Navegação Inferior (6 Abas) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-1 py-2 flex justify-around items-center z-40 max-w-md mx-auto">
         <button onclick="mudarAba('dashboard')" id="btn-tab-dashboard" class="flex flex-col items-center text-emerald-400 py-1"><i class="fa-solid fa-chart-pie text-sm mb-1"></i><span class="text-[9px]">Resumo</span></button>
         <button onclick="mudarAba('transacoes')" id="btn-tab-transacoes" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-receipt text-sm mb-1"></i><span class="text-[9px]">Extrato</span></button>
         <button onclick="mudarAba('fixos')" id="btn-tab-fixos" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-calendar-days text-sm mb-1"></i><span class="text-[9px]">Fixos</span></button>
         <button onclick="mudarAba('cofrinho')" id="btn-tab-cofrinho" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-piggy-bank text-sm mb-1"></i><span class="text-[9px]">Cofrinho</span></button>
+        <button onclick="mudarAba('metas')" id="btn-tab-metas" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-bullseye text-sm mb-1"></i><span class="text-[9px]">Metas</span></button>
         <button onclick="mudarAba('ia')" id="btn-tab-ia" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-brain text-sm mb-1"></i><span class="text-[9px]">AI Bot</span></button>
     </nav>
 
@@ -278,6 +294,22 @@
         </div>
     </div>
 
+    <!-- Modal Meta -->
+    <div id="modal-meta" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Nova Meta Financeira</h3>
+                <button onclick="fecharModalMeta()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="text" id="meta-desc" placeholder="Nome da Meta (Ex: Comprar Moto, Viagem)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <div class="grid grid-cols-2 gap-3">
+                <input type="number" id="meta-alvo" step="0.01" placeholder="Valor Alvo R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+                <input type="number" id="meta-atual" step="0.01" placeholder="Já guardado R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            </div>
+            <button onclick="salvarMeta()" class="w-full bg-indigo-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Meta</button>
+        </div>
+    </div>
+
     <!-- Modal Configurações -->
     <div id="modal-config" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
@@ -294,13 +326,13 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v12';
+        const STORAGE_KEY = 'meu-bolso-ai-v13';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
 
         function carregarEstado() {
-            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, vozAtiva: false, apiKey: '' };
+            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], metas: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, vozAtiva: false, apiKey: '' };
             try {
                 const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY));
                 return salvo ? { ...padrao, ...salvo } : padrao;
@@ -332,6 +364,14 @@
             document.getElementById('modal-fixo').classList.remove('hidden');
         }
         function fecharModalGastoFixo() { document.getElementById('modal-fixo').classList.add('hidden'); }
+
+        function abrirModalMeta() {
+            document.getElementById('meta-desc').value = '';
+            document.getElementById('meta-alvo').value = '';
+            document.getElementById('meta-atual').value = '';
+            document.getElementById('modal-meta').classList.remove('hidden');
+        }
+        function fecharModalMeta() { document.getElementById('modal-meta').classList.add('hidden'); }
 
         function abrirConfiguracoes() {
             document.getElementById('config-nome').value = estado.nome || '';
@@ -373,11 +413,14 @@
         }
 
         function mudarAba(aba) {
-            ['dashboard', 'transacoes', 'fixos', 'cofrinho', 'ia'].forEach(nome => {
-                document.getElementById('tab-' + nome).classList.toggle('hidden', nome !== aba);
-                const botao = document.getElementById('btn-tab-' + nome);
-                botao.classList.toggle('text-emerald-400', nome === aba);
-                botao.classList.toggle('text-slate-500', nome !== aba);
+            ['dashboard', 'transacoes', 'fixos', 'cofrinho', 'metas', 'ia'].forEach(nome => {
+                const elTab = document.getElementById('tab-' + nome);
+                const elBtn = document.getElementById('btn-tab-' + nome);
+                if (elTab) elTab.classList.toggle('hidden', nome !== aba);
+                if (elBtn) {
+                    elBtn.classList.toggle('text-emerald-400', nome === aba);
+                    elBtn.classList.toggle('text-slate-500', nome !== aba);
+                }
             });
             if (aba === 'dashboard') renderizarGrafico();
             window.scrollTo(0, 0);
@@ -419,6 +462,24 @@
             estado.fixos = estado.fixos.filter(f => f.id !== id);
             salvarEstado();
             renderizarTudo();
+        }
+
+        function salvarMeta() {
+            const desc = document.getElementById('meta-desc').value.trim();
+            const alvo = parseFloat(document.getElementById('meta-alvo').value);
+            const atual = parseFloat(document.getElementById('meta-atual').value) || 0;
+            if (!desc || !(alvo > 0)) { alert('Preencha o nome e um valor alvo válido.'); return; }
+            if (!estado.metas) estado.metas = [];
+            estado.metas.push({ id: Date.now(), desc, alvo, atual });
+            salvarEstado();
+            fecharModalMeta();
+            renderizarMetas();
+        }
+
+        function removerMeta(id) {
+            estado.metas = estado.metas.filter(m => m.id !== id);
+            salvarEstado();
+            renderizarMetas();
         }
 
         function atualizarCofrinho() {
@@ -595,6 +656,29 @@
             }).join('');
         }
 
+        function renderizarMetas() {
+            const lista = document.getElementById('lista-metas');
+            if (!estado.metas || !estado.metas.length) { lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhuma meta cadastrada.</div>'; return; }
+            lista.innerHTML = estado.metas.map(m => {
+                const progresso = Math.min(100, Math.round((m.atual / m.alvo) * 100));
+                return `
+                <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm font-bold text-slate-200">${escaparHtml(m.desc)}</p>
+                        <button onclick="removerMeta(${m.id})" class="text-slate-500 hover:text-rose-400 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400">
+                        <span>Guardado: <strong class="text-emerald-400">${formatarMoeda(m.atual)}</strong></span>
+                        <span>Alvo: <strong class="text-slate-200">${formatarMoeda(m.alvo)}</strong></span>
+                    </div>
+                    <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
+                        <div class="bg-indigo-500 h-2.5 rounded-full transition-all duration-500" style="width: ${progresso}%"></div>
+                    </div>
+                    <p class="text-[10px] text-right text-indigo-300 font-semibold">${progresso}% concluído</p>
+                </div>`;
+            }).join('');
+        }
+
         function renderizarCofrinho() {
             const taxaAnual = { nubank: 0.1065, itau: 0.06, tesouro: 0.1075 }[estado.banco] || 0.1065;
             const taxaMensal = Math.pow(1 + taxaAnual, 1 / 12) - 1;
@@ -611,10 +695,11 @@
             renderizarGrafico();
             renderizarExtrato();
             renderizarFixos();
+            renderizarMetas();
             renderizarCofrinho();
         }
 
-        // ---------- Assistente de IA Original Restaurado ----------
+        // ---------- IA ----------
         function adicionarMensagem(texto, doUsuario) {
             const chat = document.getElementById('chat-mensagens');
             const div = document.createElement('div');
