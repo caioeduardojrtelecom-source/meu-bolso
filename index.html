@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <!-- Calendário Interativo com Navegação Simultânea -->
+            <!-- Calendário Interativo -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
                 <div class="flex items-center justify-between">
                     <button onclick="mudarMesCalendario(-1)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
@@ -125,7 +125,7 @@
             </div>
         </section>
 
-        <!-- ABA 3: FIXOS E DÍVIDAS COM PRAZO -->
+        <!-- ABA 3: FIXOS -->
         <section id="tab-fixos" class="space-y-6 hidden">
             <button onclick="abrirModalGastoFixo()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-calendar-plus text-lg"></i>
@@ -165,7 +165,7 @@
             </div>
         </section>
 
-        <!-- ABA 5: IA -->
+        <!-- ABA 5: IA (ESTILO ORIGINAL RESTAURADO) -->
         <section id="tab-ia" class="space-y-3 hidden flex flex-col h-[75vh]">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3 shrink-0">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
@@ -173,16 +173,24 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Assistente Inteligente AI</h3>
-                    <p class="text-xs text-slate-400">Analisa o mês selecionado no calendário.</p>
+                    <p class="text-xs text-slate-400">Analisa seus fixos, extrato e cofrinho.</p>
                 </div>
+                <button onclick="alternarVoz()" id="btn-voz" title="Ativar/Desativar Voz" class="ml-auto w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 transition">
+                    <i id="icone-voz" class="fa-solid fa-volume-xmark text-sm"></i>
+                </button>
             </div>
+
             <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
                 <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
-                    Olá, Caio! Já estou sincronizada com o mês que você selecionar no calendário. Pode perguntar!
+                    Olá, Caio! Já estou sincronizada com seus gastos. Pode me perguntar sobre seus gastos, calendário ou cofrinho!
                 </div>
             </div>
+
             <div class="flex items-center space-x-2 shrink-0 pt-2">
-                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar neste mês?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar no mês?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                <button onclick="alternarMicrofone()" id="btn-microfone" class="w-12 h-12 shrink-0 bg-slate-800 text-slate-200 rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-microphone text-sm"></i>
+                </button>
                 <button onclick="enviarMensagemIA()" class="w-12 h-12 shrink-0 bg-emerald-500 text-slate-950 rounded-2xl flex items-center justify-center font-bold shadow-lg">
                     <i class="fa-solid fa-paper-plane text-sm"></i>
                 </button>
@@ -212,7 +220,7 @@
         <button onclick="mudarAba('ia')" id="btn-tab-ia" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-brain text-sm mb-1"></i><span class="text-[9px]">AI Bot</span></button>
     </nav>
 
-    <!-- Modal Transação / Ganho Extra -->
+    <!-- Modal Transação -->
     <div id="modal-transacao" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
@@ -241,7 +249,7 @@
         </div>
     </div>
 
-    <!-- Modal Dívida com Prazo Fim -->
+    <!-- Modal Fixo -->
     <div id="modal-fixo" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
@@ -286,13 +294,13 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v11';
+        const STORAGE_KEY = 'meu-bolso-ai-v12';
         let estado = carregarEstado();
         let grafico = null;
-        let dataVisualizacaoCalendario = new Date(); // Controla o mês selecionado no app todo
+        let dataVisualizacaoCalendario = new Date();
 
         function carregarEstado() {
-            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, apiKey: '' };
+            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, vozAtiva: false, apiKey: '' };
             try {
                 const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY));
                 return salvo ? { ...padrao, ...salvo } : padrao;
@@ -335,9 +343,8 @@
         function fecharConfiguracoes() { document.getElementById('modal-config').classList.add('hidden'); }
         function fecharModalDia() { document.getElementById('modal-dia').classList.add('hidden'); }
 
-        // Verifica se uma dívida está ativa no ano/mês atualmente selecionado no calendário
         function dividaAtivaNoMes(f, anoVis, mesVis) {
-            if (!f.mesFim || !f.anoFim) return true; // Sem prazo = contínua
+            if (!f.mesFim || !f.anoFim) return true;
             const mesFim = Number(f.mesFim);
             const anoFim = Number(f.anoFim);
             if (anoVis < anoFim) return true;
@@ -346,7 +353,6 @@
         }
 
         function calcularTotaisMes(anoVis, mesVis) {
-            // 1. Filtrar transações (gastos e ganhos extras) apenas do mês/ano visualizado
             const transacoesMes = estado.transacoes.filter(t => {
                 if (!t.data) return false;
                 const [tAno, tMes] = t.data.split('-').map(Number);
@@ -356,7 +362,6 @@
             const totalVariavel = transacoesMes.filter(t => t.tipo !== 'ganho').reduce((s, t) => s + Number(t.valor), 0);
             const totalGanhosExtras = transacoesMes.filter(t => t.tipo === 'ganho').reduce((s, t) => s + Number(t.valor), 0);
 
-            // 2. Filtrar dívidas fixas ativas neste mês/ano
             const fixosAtivos = estado.fixos.filter(f => dividaAtivaNoMes(f, anoVis, mesVis));
             const totalFixos = fixosAtivos.reduce((s, f) => s + Number(f.valor), 0);
 
@@ -439,17 +444,11 @@
             renderizarTudo();
         }
 
-        // Clique no dia do calendário para ver dívidas ou lançamentos daquela data no mês selecionado
         function clicarDiaCalendario(dia, ano, mes) {
             const nomeMes = new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month: 'long' });
-            
-            // Dívidas ativas neste mês que vencem neste dia
             const fixosDoDia = estado.fixos.filter(f => f.dia === dia && dividaAtivaNoMes(f, ano, mes + 1));
-            
-            // Transações daquela data exata
             const dataIsoAlvo = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
             const transDoDia = estado.transacoes.filter(t => t.data === dataIsoAlvo);
-
             const itensDoDia = [...fixosDoDia, ...transDoDia];
             
             const titulo = document.getElementById('modal-dia-titulo');
@@ -460,7 +459,7 @@
                 let html = `<p class="text-amber-400 font-semibold mb-2">${itensDoDia.length} registro(s) nesta data:</p>`;
                 itensDoDia.forEach(d => {
                     const cor = d.tipo === 'ganho' ? 'text-emerald-400' : 'text-amber-400';
-                    const sinal = d.type === 'ganho' ? '+' : '-';
+                    const sinal = d.tipo === 'ganho' ? '+' : '-';
                     html += `<div class="bg-slate-800 p-2.5 rounded-xl mb-1 flex justify-between items-center">
                         <span class="text-slate-200 font-medium">${escaparHtml(d.desc)}</span>
                         <span class="${cor} font-bold">${sinal} ${formatarMoeda(d.valor)}</span>
@@ -477,7 +476,7 @@
 
         function renderizarCalendario() {
             const ano = dataVisualizacaoCalendario.getFullYear();
-            const mes = dataVisualizacaoCalendario.getMonth(); // 0 a 11
+            const mes = dataVisualizacaoCalendario.getMonth();
             const mesVis = mes + 1;
             
             const nomeMesFormatado = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -487,21 +486,14 @@
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
             const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
 
-            // Mapeia dias com dívidas fixas ativas no mês
             const diasComCompromisso = {};
             estado.fixos.forEach(f => {
-                if (f.dia && dividaAtivaNoMes(f, ano, mesVis)) {
-                    diasComCompromisso[f.dia] = true;
-                }
+                if (f.dia && dividaAtivaNoMes(f, ano, mesVis)) diasComCompromisso[f.dia] = true;
             });
-
-            // Mapeia dias com transações no mês/ano visualizado
             estado.transacoes.forEach(t => {
                 if (t.data) {
                     const [tAno, tMes, tDia] = t.data.split('-').map(Number);
-                    if (tAno === ano && tMes === mesVis) {
-                        diasComCompromisso[tDia] = true;
-                    }
+                    if (tAno === ano && tMes === mesVis) diasComCompromisso[tDia] = true;
                 }
             });
 
@@ -527,7 +519,6 @@
             }
             document.getElementById('grade-calendario').innerHTML = html;
 
-            // Cálculos dinâmicos baseados no mês selecionado
             const totais = calcularTotaisMes(ano, mesVis);
             const diasRestantes = ultimoDiaMes - new Date().getDate() + 1;
             document.getElementById('txt-dias-mes').textContent = ultimoDiaMes;
@@ -597,7 +588,7 @@
                 <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/40 rounded-2xl px-4 py-3">
                     <div>
                         <div class="flex items-center space-x-2"><p class="text-sm font-semibold text-slate-200">${escaparHtml(f.desc)}</p>${badge}</div>
-                        <p class="text-[11px] text-amber-400 font-semibold">Vencimento dia ${f.dia} (${statusPrazo})</p>
+                        <p class="text-[11px] text-amber-400 font-semibold">Vencimento todo dia ${f.dia} (${statusPrazo})</p>
                     </div>
                     <div class="flex items-center space-x-3"><span class="text-sm font-bold text-amber-400">${formatarMoeda(f.valor)}</span><button onclick="removerGastoFixo(${f.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
                 </div>`;
@@ -623,28 +614,79 @@
             renderizarCofrinho();
         }
 
-        // IA Adaptada ao Mês Selecionado
+        // ---------- Assistente de IA Original Restaurado ----------
+        function adicionarMensagem(texto, doUsuario) {
+            const chat = document.getElementById('chat-mensagens');
+            const div = document.createElement('div');
+            div.className = doUsuario ? 'bg-emerald-500 text-slate-950 text-xs p-3.5 rounded-2xl max-w-[85%] self-end font-medium' : 'bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed';
+            div.textContent = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            if (!doUsuario) falar(texto);
+        }
+
         async function enviarMensagemIA() {
             const input = document.getElementById('input-pergunta-ia');
             const pergunta = input.value.trim();
             if (!pergunta) return;
-            
-            const chat = document.getElementById('chat-mensagens');
-            chat.innerHTML += `<div class="bg-emerald-500 text-slate-950 text-xs p-3.5 rounded-2xl max-w-[85%] self-end font-medium">${escaparHtml(pergunta)}</div>`;
+            adicionarMensagem(pergunta, true);
             input.value = '';
-            chat.scrollTop = chat.scrollHeight;
 
             const ano = dataVisualizacaoCalendario.getFullYear();
             const mesVis = dataVisualizacaoCalendario.getMonth() + 1;
             const nomeMes = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
             const totais = calcularTotaisMes(ano, mesVis);
 
-            let resposta = `Para o mês de ${nomeMes}: Renda total R$ ${totais.rendaTotalMes.toFixed(2)}, Dívidas fixas R$ ${totais.totalFixos.toFixed(2)}, Gastos variáveis R$ ${totais.totalVariavel.toFixed(2)} e saldo livre de R$ ${totais.saldo.toFixed(2)}.`;
+            const contexto = `Você é o assistente financeiro do Caio. Dados para ${nomeMes}: Renda total R$ ${totais.rendaTotalMes.toFixed(2)}, Dívidas fixas R$ ${totais.totalFixos.toFixed(2)}, Gastos variáveis R$ ${totais.totalVariavel.toFixed(2)}, Saldo livre R$ ${totais.saldo.toFixed(2)}. Responda de forma clara e direta em português.`;
+
+            if (estado.apiKey) {
+                try {
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${estado.apiKey}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model: 'llama-3.3-70b-versatile',
+                            messages: [{ role: 'system', content: contexto }, { role: 'user', content: pergunta }]
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.choices && data.choices[0]) {
+                        adicionarMensagem(data.choices[0].message.content, false);
+                        return;
+                    }
+                } catch (e) { console.error(e); }
+            }
 
             setTimeout(() => {
-                chat.innerHTML += `<div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">${escaparHtml(resposta)}</div>`;
-                chat.scrollTop = chat.scrollHeight;
+                let resposta = `No mês de ${nomeMes}, sua renda total é ${formatarMoeda(totais.rendaTotalMes)}, com dívidas fixas de ${formatarMoeda(totais.totalFixos)} e saldo livre de ${formatarMoeda(totais.saldo)}.`;
+                adicionarMensagem(resposta, false);
             }, 400);
+        }
+
+        function falar(texto) {
+            if (!estado.vozAtiva || !('speechSynthesis' in window)) return;
+            speechSynthesis.cancel();
+            const fala = new SpeechSynthesisUtterance(texto);
+            fala.lang = 'pt-BR';
+            speechSynthesis.speak(fala);
+        }
+
+        function alternarVoz() {
+            if (!('speechSynthesis' in window)) return alert('Navegador não suporta voz.');
+            estado.vozAtiva = !estado.vozAtiva;
+            salvarEstado();
+            const icone = document.getElementById('icone-voz');
+            icone.className = 'fa-solid text-sm ' + (estado.vozAtiva ? 'fa-volume-high text-emerald-400' : 'fa-volume-xmark text-slate-400');
+            if (estado.vozAtiva) falar('Voz ativada.');
+        }
+
+        const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+        function alternarMicrofone() {
+            if (!Reconhecimento) return alert('Reconhecimento não suportado.');
+            const rec = new Reconhecimento();
+            rec.lang = 'pt-BR';
+            rec.onresult = e => { document.getElementById('input-pergunta-ia').value = e.results[0][0].transcript; enviarMensagemIA(); };
+            rec.start();
         }
 
         document.getElementById('select-banco').value = estado.banco;
