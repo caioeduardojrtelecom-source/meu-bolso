@@ -170,7 +170,7 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Assistente Inteligente AI</h3>
-                    <p class="text-xs text-slate-400">Respostas inteligentes e leitura em voz alta.</p>
+                    <p class="text-xs text-slate-400">Respostas coerentes baseadas nos seus gastos.</p>
                 </div>
                 <button onclick="alternarVoz()" id="btn-voz" title="Ativar/Desativar Voz" class="ml-auto w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 transition">
                     <i id="icone-voz" class="fa-solid fa-volume-xmark text-sm"></i>
@@ -179,12 +179,12 @@
 
             <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
                 <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
-                    Olá, Caio! Já estou pronta. Pergunte qualquer coisa sobre suas finanças.
+                    Olá, Caio! Já estou pronta. Pergunte quanto pode gastar por dia ou sobre suas contas.
                 </div>
             </div>
 
             <div class="flex items-center space-x-2 shrink-0 pt-2">
-                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar no dia 15?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar por dia?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
                 <button onclick="alternarMicrofone()" id="btn-microfone" class="w-12 h-12 shrink-0 bg-slate-800 text-slate-200 rounded-2xl flex items-center justify-center">
                     <i class="fa-solid fa-microphone text-sm"></i>
                 </button>
@@ -262,7 +262,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v7';
+        const STORAGE_KEY = 'meu-bolso-ai-v8';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
@@ -283,7 +283,6 @@
             return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
         }
 
-        // Funções de Modais
         function abrirModalTransacao() {
             document.getElementById('trans-desc').value = '';
             document.getElementById('trans-valor').value = '';
@@ -425,9 +424,10 @@
             document.getElementById('grade-calendario').innerHTML = html;
             const d = calcularDatas();
             const t = calcularTotais();
+            const diasBase = d.diasAtePagamento || d.diasRestantesMes;
             document.getElementById('txt-dias-mes').textContent = ultimoDiaMes;
             document.getElementById('txt-dias-pagamento').textContent = d.diasAtePagamento ?? '-';
-            document.getElementById('txt-gasto-dia').textContent = formatarMoeda(Math.max(0, t.saldo) / (d.diasAtePagamento || d.diasRestantesMes));
+            document.getElementById('txt-gasto-dia').textContent = formatarMoeda(Math.max(0, t.saldo) / diasBase);
         }
 
         function renderizarResumo() {
@@ -494,7 +494,7 @@
             renderizarCofrinho();
         }
 
-        // IA
+        // IA Coerente e Direta
         function adicionarMensagem(texto, doUsuario) {
             const chat = document.getElementById('chat-mensagens');
             const div = document.createElement('div');
@@ -513,7 +513,22 @@
             input.value = '';
 
             const t = calcularTotais();
-            const contexto = `Você é o assistente financeiro do Caio. Dados atuais: Renda R$ ${estado.renda}, Gastos Fixos R$ ${t.totalFixos}, Gastos Variáveis R$ ${t.totalVariavel}, Saldo disponível R$ ${t.saldo}. Responda em português de forma clara e direta.`;
+            const d = calcularDatas();
+            const diasBase = d.diasAtePagamento || d.diasRestantesMes;
+            const gastoDiario = Math.max(0, t.saldo) / diasBase;
+
+            const pLower = pergunta.toLowerCase();
+            let resposta = "";
+
+            if (pLower.includes('gastar') || pLower.includes('dia') || pLower.includes('quanto') || pLower.includes('por dia')) {
+                resposta = `Caio, considerando seu saldo livre atual de ${formatarMoeda(t.saldo)} e os ${diasBase} dias restantes até o próximo recebimento, você pode gastar cerca de ${formatarMoeda(gastoDiario)} por dia.`;
+            } else if (pLower.includes('fixo') || pLower.includes('conta')) {
+                resposta = `Seus gastos fixos somam ${formatarMoeda(t.totalFixos)} por mês, divididos em ${estado.fixos.length} compromissos cadastrados.`;
+            } else if (pLower.includes('saldo') || pLower.includes('sobra') || pLower.includes('disponível')) {
+                resposta = `Sua renda é ${formatarMoeda(estado.renda)}, os fixos são ${formatarMoeda(t.totalFixos)} e os variáveis são ${formatarMoeda(t.totalVariavel)}. Sobram ${formatarMoeda(t.saldo)} livres.`;
+            } else {
+                resposta = `Com saldo livre de ${formatarMoeda(t.saldo)}, sua média de gasto diário recomendada é de ${formatarMoeda(gastoDiario)}.`;
+            }
 
             if (estado.apiKey) {
                 try {
@@ -522,7 +537,7 @@
                         headers: { 'Authorization': `Bearer ${estado.apiKey}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             model: 'llama-3.3-70b-versatile',
-                            messages: [{ role: 'system', content: contexto }, { role: 'user', content: pergunta }]
+                            messages: [{ role: 'system', content: 'Você é um assistente financeiro direto e objetivo.' }, { role: 'user', content: pergunta }]
                         })
                     });
                     const data = await res.json();
@@ -533,10 +548,7 @@
                 } catch (e) { console.error(e); }
             }
 
-            setTimeout(() => {
-                let resp = `Caio, sua renda é ${formatarMoeda(estado.renda)}, os fixos somam ${formatarMoeda(t.totalFixos)} e os variáveis ${formatarMoeda(t.totalVariavel)}. Seu saldo livre atual é de ${formatarMoeda(t.saldo)}.`;
-                adicionarMensagem(resp, false);
-            }, 400);
+            setTimeout(() => { adicionarMensagem(resposta, false); }, 400);
         }
 
         function falar(texto) {
