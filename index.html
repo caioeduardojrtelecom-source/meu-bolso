@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meu Bolso AI - Controle Financeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-28">
+
+    <!-- Cabeçalho -->
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-bold text-lg shadow-lg shadow-emerald-500/20">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base leading-tight">Meu Bolso AI</h1>
+                <p class="text-xs text-slate-400">Inteligência Financeira</p>
+            </div>
+        </div>
+        <button onclick="abrirConfiguracoes()" class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 hover:bg-slate-700 transition">
+            <i class="fa-solid fa-gear text-sm"></i>
+        </button>
+    </header>
+
+    <!-- Conteúdo Principal (Abas) -->
+    <main class="max-w-md mx-auto p-4 space-y-6">
+
+        <!-- ABA 1: RESUMO E DASHBOARD -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Disponível no Mês</p>
+                        <h2 id="txt-saldo" class="text-3xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h2>
+                    </div>
+                    <span id="txt-taxa-poupanca" class="bg-emerald-500/20 text-emerald-300 text-xs px-2.5 py-1 rounded-full font-semibold border border-emerald-500/30">
+                        0% guardado
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-slate-800/80 text-center">
+                    <div>
+                        <p class="text-[10px] text-slate-400">Renda</p>
+                        <p id="txt-renda" class="text-xs font-bold text-slate-200 mt-0.5">R$ 0</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400">Gastos Fixos</p>
+                        <p id="txt-total-fixos" class="text-xs font-bold text-amber-400 mt-0.5">R$ 0</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400">Variáveis</p>
+                        <p id="txt-total-gasto" class="text-xs font-bold text-rose-400 mt-0.5">R$ 0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Gastos -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg">
+                <h3 class="font-bold text-sm text-slate-300 mb-4 flex items-center justify-between">
+                    <span>Distribuição de Gastos</span>
+                    <i class="fa-solid fa-chart-pie text-slate-500"></i>
+                </h3>
+                <div class="relative w-full h-48 flex items-center justify-center">
+                    <canvas id="graficoCategorias"></canvas>
+                </div>
+            </div>
+
+            <!-- Calendário Interativo com Navegação de Meses -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+                <div class="flex items-center justify-between">
+                    <button onclick="mudarMesCalendario(-1)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <h3 id="txt-calendario-mes" class="font-bold text-sm text-slate-200 capitalize">Calendário</h3>
+                    <button onclick="mudarMesCalendario(1)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+                <p id="txt-hoje" class="text-xs text-slate-400 -mt-2 capitalize text-center"></p>
+                <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-500 font-semibold">
+                    <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                </div>
+                <div id="grade-calendario" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+                <div class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[10px] text-slate-400">
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span>Hoje</span>
+                    <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full border-2 border-sky-400 mr-1.5"></span>Pagamento</span>
+                    <span class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>Vencimento fixo</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-800/80 text-center">
+                    <div>
+                        <p class="text-[10px] text-slate-400">Dias no mês</p>
+                        <p id="txt-dias-mes" class="text-sm font-bold text-slate-200 mt-0.5">0</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400">Dias até receber</p>
+                        <p id="txt-dias-pagamento" class="text-sm font-bold text-sky-400 mt-0.5">-</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400">Pode gastar/dia</p>
+                        <p id="txt-gasto-dia" class="text-sm font-bold text-emerald-400 mt-0.5">R$ 0</p>
+                    </div>
+                </div>
+                <p id="txt-aviso-pagamento" class="text-[11px] text-slate-500 text-center"></p>
+            </div>
+        </section>
+
+        <!-- ABA 2: LANÇAMENTOS E EXTRATO -->
+        <section id="tab-transacoes" class="space-y-6 hidden">
+            <button onclick="abrirModalTransacao()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-500/20 transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-plus-circle text-lg"></i>
+                <span>Adicionar Gasto Variável</span>
+            </button>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-sm text-slate-300">Extrato do Mês Atual</h3>
+                    <span id="txt-qtd-transacoes" class="text-xs text-slate-500">0 registros</span>
+                </div>
+                <div id="lista-extrato" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
+                    <div class="text-center py-8 text-slate-500 text-sm">Nenhuma transação registrada.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: GASTOS FIXOS -->
+        <section id="tab-fixos" class="space-y-6 hidden">
+            <button onclick="abrirModalGastoFixo()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-calendar-plus text-lg"></i>
+                <span>Adicionar Gasto Fixo / Prazo</span>
+            </button>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-sm text-slate-300">Compromissos e Gastos Fixos</h3>
+                    <span id="txt-qtd-fixos" class="text-xs text-slate-500">0 ativos</span>
+                </div>
+                <div id="lista-fixos" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
+                    <div class="text-center py-8 text-slate-500 text-sm">Nenhum gasto fixo cadastrado.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: COFRINHO -->
+        <section id="tab-cofrinho" class="space-y-6 hidden">
+            <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs text-emerald-400 font-medium uppercase tracking-wider">Total no Cofrinho</p>
+                        <h2 id="txt-total-cofrinho" class="text-3xl font-extrabold text-emerald-300 mt-1">R$ 0,00</h2>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl">
+                        <i class="fa-solid fa-piggy-bank"></i>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-300">
+                    <span>Rendimento Estimado no Mês:</span>
+                    <span id="txt-rendimento-mes" class="font-bold text-emerald-400 text-sm">+ R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
+                <h3 class="font-bold text-sm text-slate-300 flex items-center space-x-2">
+                    <i class="fa-solid fa-building-columns text-emerald-400"></i>
+                    <span>Configurar Banco e Aporte</span>
+                </h3>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium">Banco / Instituição</label>
+                        <select id="select-banco" onchange="atualizarCofrinho()" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                            <option value="nubank">Nubank (100% CDI - ~10.65% a.a.)</option>
+                            <option value="itau">Itaú / Tradicional (Poupança - ~6% a.a.)</option>
+                            <option value="tesouro">Tesouro Direto / Selic (~10.75% a.a.)</option>
+                            <option value="personalizado">Personalizado (~12% a.a.)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-slate-400 font-medium">Aporte Mensal (R$)</label>
+                            <input type="number" id="input-aporte" value="500" oninput="atualizarCofrinho()" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-400 font-medium">Meses</label>
+                            <input type="number" id="input-meses" value="12" oninput="atualizarCofrinho()" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/50 space-y-2 text-xs">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Total investido:</span>
+                        <span id="txt-total-investido" class="font-semibold text-slate-200">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Lucro em juros:</span>
+                        <span id="txt-total-juros" class="font-semibold text-emerald-400">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 5: ASSISTENTE DE IA -->
+        <section id="tab-ia" class="space-y-4 hidden flex flex-col h-[75vh]">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">Assistente Inteligente AI</h3>
+                    <p class="text-xs text-slate-400">Analisa seus fixos, extrato e cofrinho.</p>
+                </div>
+                <button onclick="alternarVoz()" id="btn-voz" title="Ler respostas" class="ml-auto w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-700 transition">
+                    <i id="icone-voz" class="fa-solid fa-volume-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
+                <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
+                    Olá, Caio! Já estou sincronizada com seus gastos. Pode me perguntar sobre seus gastos, calendário ou cofrinho!
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar no mês?" class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 transition">
+                <button onclick="alternarMicrofone()" id="btn-microfone" title="Falar" class="w-12 h-12 shrink-0 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl flex items-center justify-center transition">
+                    <i class="fa-solid fa-microphone text-sm"></i>
+                </button>
+                <button onclick="enviarMensagemIA()" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-2xl flex items-center justify-center font-bold transition shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Barra de Navegação Inferior -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/80 px-2 py-2 flex justify-around items-center z-40 max-w-md mx-auto">
+        <button onclick="mudarAba('dashboard')" id="btn-tab-dashboard" class="flex flex-col items-center text-emerald-400 py-1 transition">
+            <i class="fa-solid fa-chart-pie text-sm mb-1"></i>
+            <span class="text-[9px] font-semibold">Resumo</span>
+        </button>
+        <button onclick="mudarAba('transacoes')" id="btn-tab-transacoes" class="flex flex-col items-center text-slate-500 py-1 transition hover:text-slate-300">
+            <i class="fa-solid fa-receipt text-sm mb-1"></i>
+            <span class="text-[9px] font-medium">Extrato</span>
+        </button>
+        <button onclick="mudarAba('fixos')" id="btn-tab-fixos" class="flex flex-col items-center text-slate-500 py-1 transition hover:text-slate-300">
+            <i class="fa-solid fa-calendar-days text-sm mb-1"></i>
+            <span class="text-[9px] font-medium">Fixos</span>
+        </button>
+        <button onclick="mudarAba('cofrinho')" id="btn-tab-cofrinho" class="flex flex-col items-center text-slate-500 py-1 transition hover:text-slate-300">
+            <i class="fa-solid fa-piggy-bank text-sm mb-1"></i>
+            <span class="text-[9px] font-medium">Cofrinho</span>
+        </button>
+        <button onclick="mudarAba('ia')" id="btn-tab-ia" class="flex flex-col items-center text-slate-500 py-1 transition hover:text-slate-300">
+            <i class="fa-solid fa-brain text-sm mb-1"></i>
+            <span class="text-[9px] font-medium">AI Bot</span>
+        </button>
+    </nav>
+
+    <!-- Modal Transação Variável -->
+    <div id="modal-transacao" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Novo Gasto Variável</h3>
+                <button onclick="fecharModalTransacao()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Descrição</label>
+                    <input type="text" id="trans-desc" placeholder="Ex: Supermercado" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium">Valor (R$)</label>
+                        <input type="number" id="trans-valor" step="0.01" min="0" placeholder="0,00" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium">Data</label>
+                        <input type="date" id="trans-data" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Categoria</label>
+                    <select id="trans-categoria" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                        <option value="Alimentação">Alimentação</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Lazer">Lazer</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Compras">Compras</option>
+                        <option value="Educação">Educação</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="salvarTransacao()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl transition">Salvar Gasto</button>
+        </div>
+    </div>
+
+    <!-- Modal Gasto Fixo -->
+    <div id="modal-fixo" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Novo Gasto Fixo / Prazo</h3>
+                <button onclick="fecharModalGastoFixo()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Descrição</label>
+                    <input type="text" id="fixo-desc" placeholder="Ex: Aluguel, Internet" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium">Valor Mensal (R$)</label>
+                        <input type="number" id="fixo-valor" step="0.01" min="0" placeholder="0,00" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 font-medium">Dia do Vencimento</label>
+                        <input type="number" id="fixo-dia" min="1" max="31" placeholder="10" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Parcelas restantes</label>
+                    <input type="number" id="fixo-parcelas" min="1" placeholder="Ex: 12" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-2xl transition">Salvar Gasto Fixo</button>
+        </div>
+    </div>
+
+    <!-- Modal Configurações -->
+    <div id="modal-config" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Configurações</h3>
+                <button onclick="fecharConfiguracoes()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Seu Nome</label>
+                    <input type="text" id="config-nome" placeholder="Ex: Caio" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Renda Mensal (R$)</label>
+                    <input type="number" id="config-renda" step="0.01" min="0" placeholder="0,00" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 font-medium">Dia do Pagamento</label>
+                    <input type="number" id="config-dia-pagamento" min="1" max="31" placeholder="Ex: 5" class="w-full bg-slate-800 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1 focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <button onclick="salvarConfiguracoes()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl transition">Salvar</button>
+            <button onclick="limparDados()" class="w-full bg-slate-800 hover:bg-rose-500/20 text-rose-400 font-semibold py-2.5 rounded-2xl text-sm transition">Apagar todos os dados</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'meu-bolso-ai-v4';
+        const TAXAS_BANCO = { nubank: 0.1065, itau: 0.06, tesouro: 0.1075, personalizado: 0.12 };
+        const CORES = ['#f59e0b', '#f43f5e', '#10b981', '#6366f1', '#06b6d4', '#a855f7', '#ec4899', '#84cc16'];
+
+        let estado = carregarEstado();
+        let grafico = null;
+
+        // Estado do Calendário (Ano e Mês exibidos atualmente)
+        let dataVisualizacaoCalendario = new Date();
+
+        function carregarEstado() {
+            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, vozAtiva: false };
+            try {
+                const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                return salvo ? { ...padrao, ...salvo } : padrao;
+            } catch (e) {
+                return padrao;
+            }
+        }
+
+        function salvarEstado() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+        }
+
+        function formatarMoeda(valor) {
+            return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function escaparHtml(texto) {
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+
+        function hojeIso() {
+            const d = new Date();
+            return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        }
+
+        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // ---------- Cálculos ----------
+        function calcularTotais() {
+            const hoje = new Date();
+            const anoAtual = hoje.getFullYear();
+            const mesAtual = hoje.getMonth() + 1;
+
+            const transacoesMes = estado.transacoes.filter(t => {
+                if (!t.data) return false;
+                const [ano, mes] = t.data.split('-').map(Number);
+                return ano === anoAtual && mes === mesAtual;
+            });
+
+            const totalVariavel = transacoesMes.reduce((s, t) => s + Number(t.valor), 0);
+            const totalFixos = estado.fixos.reduce((s, f) => s + Number(f.valor), 0);
+            const aporte = Number(estado.aporte) || 0;
+            const saldo = Number(estado.renda) - totalFixos - totalVariavel - aporte;
+            const taxaPoupanca = estado.renda > 0 ? Math.round((aporte / estado.renda) * 100) : 0;
+            return { transacoesMes, totalVariavel, totalFixos, aporte, saldo, taxaPoupanca };
+        }
+
+        function calcularDatas() {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+            const diasRestantesMes = ultimoDiaMes - hoje.getDate() + 1;
+            let proximoPagamento = null;
+            let diasAtePagamento = null;
+            if (estado.diaPagamento) {
+                const dataPagamento = (ano, mes) => new Date(ano, mes, Math.min(estado.diaPagamento, new Date(ano, mes + 1, 0).getDate()));
+                proximoPagamento = dataPagamento(hoje.getFullYear(), hoje.getMonth());
+                if (proximoPagamento <= hoje) proximoPagamento = dataPagamento(hoje.getFullYear(), hoje.getMonth() + 1);
+                diasAtePagamento = Math.round((proximoPagamento - hoje) / 86400000);
+            }
+            return { hoje, ultimoDiaMes, diasRestantesMes, proximoPagamento, diasAtePagamento };
+        }
+
+        function formatarData(data, opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) {
+            return data.toLocaleDateString('pt-BR', opcoes);
+        }
+
+        function calcularCofrinho() {
+            const taxaAnual = TAXAS_BANCO[estado.banco] ?? TAXAS_BANCO.nubank;
+            const taxaMensal = Math.pow(1 + taxaAnual, 1 / 12) - 1;
+            const aporte = Number(estado.aporte) || 0;
+            const meses = Math.max(0, Math.floor(Number(estado.meses) || 0));
+            const total = taxaMensal > 0 ? aporte * ((Math.pow(1 + taxaMensal, meses) - 1) / taxaMensal) : aporte * meses;
+            const investido = aporte * meses;
+            return { total, investido, juros: total - investido, rendimentoMes: total * taxaMensal, taxaAnual };
+        }
+
+        // ---------- Navegação ----------
+        function mudarAba(aba) {
+            ['dashboard', 'transacoes', 'fixos', 'cofrinho', 'ia'].forEach(nome => {
+                document.getElementById('tab-' + nome).classList.toggle('hidden', nome !== aba);
+                const botao = document.getElementById('btn-tab-' + nome);
+                botao.classList.toggle('text-emerald-400', nome === aba);
+                botao.classList.toggle('text-slate-500', nome !== aba);
+            });
+            if (aba === 'dashboard') renderizarGrafico();
+            window.scrollTo(0, 0);
+        }
+
+        // ---------- Transações ----------
+        function abrirModalTransacao() {
+            document.getElementById('trans-desc').value = '';
+            document.getElementById('trans-valor').value = '';
+            document.getElementById('trans-data').value = hojeIso();
+            abrirModal('modal-transacao');
+            document.getElementById('trans-desc').focus();
+        }
+
+        function fecharModalTransacao() { fecharModal('modal-transacao'); }
+
+        function salvarTransacao() {
+            const desc = document.getElementById('trans-desc').value.trim();
+            const valor = parseFloat(document.getElementById('trans-valor').value);
+            const data = document.getElementById('trans-data').value || hojeIso();
+            const categoria = document.getElementById('trans-categoria').value;
+            if (!desc || !(valor > 0)) {
+                alert('Preencha a descrição e um valor maior que zero.');
+                return;
+            }
+            estado.transacoes.push({ id: Date.now(), desc, valor, data, categoria });
+            salvarEstado();
+            fecharModalTransacao();
+            renderizarTudo();
+        }
+
+        function removerTransacao(id) {
+            if (!confirm('Remover este gasto?')) return;
+            estado.transacoes = estado.transacoes.filter(t => t.id !== id);
+            salvarEstado();
+            renderizarTudo();
+        }
+
+        // ---------- Gastos Fixos ----------
+        function abrirModalGastoFixo() {
+            ['fixo-desc', 'fixo-valor', 'fixo-dia', 'fixo-parcelas'].forEach(id => document.getElementById(id).value = '');
+            abrirModal('modal-fixo');
+            document.getElementById('fixo-desc').focus();
+        }
+
+        function fecharModalGastoFixo() { fecharModal('modal-fixo'); }
+
+        function salvarGastoFixo() {
+            const desc = document.getElementById('fixo-desc').value.trim();
+            const valor = parseFloat(document.getElementById('fixo-valor').value);
+            const dia = parseInt(document.getElementById('fixo-dia').value, 10);
+            const parcelas = parseInt(document.getElementById('fixo-parcelas').value, 10);
+            if (!desc || !(valor > 0)) {
+                alert('Preencha a descrição e um valor maior que zero.');
+                return;
+            }
+            if (dia && (dia < 1 || dia > 31)) {
+                alert('O dia do vencimento deve estar entre 1 e 31.');
+                return;
+            }
+            estado.fixos.push({ id: Date.now(), desc, valor, dia: dia || null, parcelas: parcelas > 0 ? parcelas : null });
+            salvarEstado();
+            fecharModalGastoFixo();
+            renderizarTudo();
+        }
+
+        function removerGastoFixo(id) {
+            if (!confirm('Remover este gasto fixo?')) return;
+            estado.fixos = estado.fixos.filter(f => f.id !== id);
+            salvarEstado();
+            renderizarTudo();
+        }
+
+        // ---------- Cofrinho ----------
+        function atualizarCofrinho() {
+            estado.banco = document.getElementById('select-banco').value;
+            estado.aporte = parseFloat(document.getElementById('input-aporte').value) || 0;
+            estado.meses = parseInt(document.getElementById('input-meses').value, 10) || 0;
+            salvarEstado();
+            renderizarResumo();
+            renderizarCofrinho();
+        }
+
+        // ---------- Configurações ----------
+        function abrirConfiguracoes() {
+            document.getElementById('config-nome').value = estado.nome || '';
+            document.getElementById('config-renda').value = estado.renda || '';
+            document.getElementById('config-dia-pagamento').value = estado.diaPagamento || '';
+            abrirModal('modal-config');
+        }
+
+        function fecharConfiguracoes() { fecharModal('modal-config'); }
+
+        function salvarConfiguracoes() {
+            estado.nome = document.getElementById('config-nome').value.trim() || 'Caio';
+            estado.renda = parseFloat(document.getElementById('config-renda').value) || 0;
+            const diaPagamento = parseInt(document.getElementById('config-dia-pagamento').value, 10);
+            if (diaPagamento && (diaPagamento < 1 || diaPagamento > 31)) {
+                alert('O dia do pagamento deve estar entre 1 e 31.');
+                return;
+            }
+            estado.diaPagamento = diaPagamento || null;
+            salvarEstado();
+            fecharConfiguracoes();
+            renderizarTudo();
+        }
+
+        function limparDados() {
+            if (!confirm('Tem certeza? Todos os gastos e configurações serão apagados.')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            estado = carregarEstado();
+            fecharConfiguracoes();
+            renderizarTudo();
+        }
+
+        // ---------- Calendário com Navegação de Meses ----------
+        function mudarMesCalendario(direcao) {
+            dataVisualizacaoCalendario.setMonth(dataVisualizacaoCalendario.getMonth() + direcao);
+            renderizarCalendario();
+        }
+
+        function renderizarCalendario() {
+            const ano = dataVisualizacaoCalendario.getFullYear();
+            const mes = dataVisualizacaoCalendario.getMonth(); // 0 a 11
+            
+            const nomeMes = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            document.getElementById('txt-calendario-mes').textContent = nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1);
+            
+            const hoje = new Date();
+            document.getElementById('txt-hoje').textContent = 'Hoje: ' + formatarData(hoje);
+
+            const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+            const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+
+            const diasComVencimento = new Set(estado.fixos.filter(f => f.dia).map(f => Math.min(f.dia, ultimoDiaMes)));
+            const diaPagamentoMes = estado.diaPagamento ? Math.min(estado.diaPagamento, ultimoDiaMes) : null;
+
+            let html = '';
+            for (let i = 0; i < primeiroDiaSemana; i++) html += '<span></span>';
+            
+            for (let dia = 1; dia <= ultimoDiaMes; dia++) {
+                const ehHoje = dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear();
+                let classes = 'relative h-8 flex items-center justify-center rounded-lg ';
+                if (ehHoje) {
+                    classes += 'bg-emerald-500 text-slate-950 font-bold ';
+                } else {
+                    classes += 'text-slate-200 bg-slate-800/50 ';
+                }
+                if (dia === diaPagamentoMes) classes += 'ring-2 ring-sky-400 ';
+                const ponto = diasComVencimento.has(dia) ? '<span class="absolute bottom-0.5 w-1 h-1 rounded-full bg-amber-400"></span>' : '';
+                html += `<span class="${classes}">${dia}${ponto}</span>`;
+            }
+            document.getElementById('grade-calendario').innerHTML = html;
+
+            const d = calcularDatas();
+            const saldo = calcularTotais().saldo;
+            const diasBase = d.diasAtePagamento || d.diasRestantesMes;
+            document.getElementById('txt-dias-mes').textContent = ultimoDiaMes;
+            document.getElementById('txt-dias-pagamento').textContent = d.diasAtePagamento ?? '-';
+            document.getElementById('txt-gasto-dia').textContent = formatarMoeda(Math.max(0, saldo) / diasBase);
+            document.getElementById('txt-aviso-pagamento').textContent = d.proximoPagamento
+                ? `Próximo pagamento: ${formatarData(d.proximoPagamento, { weekday: 'long', day: 'numeric', month: 'long' })}.`
+                : 'Informe o dia do pagamento nas configurações.';
+        }
+
+        // ---------- Renderização Geral ----------
+        function renderizarResumo() {
+            const t = calcularTotais();
+            const elSaldo = document.getElementById('txt-saldo');
+            elSaldo.textContent = formatarMoeda(t.saldo);
+            elSaldo.classList.toggle('text-emerald-400', t.saldo >= 0);
+            elSaldo.classList.toggle('text-rose-400', t.saldo < 0);
+            document.getElementById('txt-taxa-poupanca').textContent = `${t.taxaPoupanca}% guardado`;
+            document.getElementById('txt-renda').textContent = formatarMoeda(estado.renda);
+            document.getElementById('txt-total-fixos').textContent = formatarMoeda(t.totalFixos);
+            document.getElementById('txt-total-gasto').textContent = formatarMoeda(t.totalVariavel);
+        }
+
+        function renderizarGrafico() {
+            if (typeof Chart === 'undefined') return;
+            const t = calcularTotais();
+            const porCat = {};
+            if (t.totalFixos > 0) porCat['Fixos'] = t.totalFixos;
+            t.transacoesMes.forEach(x => porCat[x.categoria] = (porCat[x.categoria] || 0) + x.valor);
+            const labels = Object.keys(porCat);
+            const valores = Object.values(porCat);
+            const vazio = labels.length === 0;
+
+            const dados = {
+                labels: vazio ? ['Sem gastos'] : labels,
+                datasets: [{
+                    data: vazio ? [1] : valores,
+                    backgroundColor: vazio ? ['#334155'] : labels.map((_, i) => CORES[i % CORES.length]),
+                    borderColor: '#0f172a',
+                    borderWidth: 2
+                }]
+            };
+
+            if (grafico) {
+                grafico.data = dados;
+                grafico.update();
+                return;
+            }
+            grafico = new Chart(document.getElementById('graficoCategorias'), {
+                type: 'doughnut',
+                data: dados,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#cbd5e1', boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { callbacks: { label: ctx => vazio ? 'Nenhum gasto' : `${ctx.label}: ${formatarMoeda(ctx.raw)}` } }
+                    }
+                }
+            });
+        }
+
+        function renderizarExtrato() {
+            const lista = document.getElementById('lista-extrato');
+            // Mostra todas as transações cadastradas ordenadas da mais recente para a mais antiga
+            const transacoes = [...estado.transacoes].sort((a, b) => b.data.localeCompare(a.data) || b.id - a.id);
+            document.getElementById('txt-qtd-transacoes').textContent = `${transacoes.length} registro${transacoes.length === 1 ? '' : 's'}`;
+            if (!transacoes.length) {
+                lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhuma transação registrada.</div>';
+                return;
+            }
+            lista.innerHTML = transacoes.map(t => `
+                <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/40 rounded-2xl px-4 py-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-200 truncate">${escaparHtml(t.desc)}</p>
+                        <p class="text-[11px] text-slate-500">${escaparHtml(t.categoria)} · ${t.data.split('-').reverse().join('/')}</p>
+                    </div>
+                    <div class="flex items-center space-x-3 shrink-0">
+                        <span class="text-sm font-bold text-rose-400">- ${formatarMoeda(t.valor)}</span>
+                        <button onclick="removerTransacao(${t.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderizarFixos() {
+            const lista = document.getElementById('lista-fixos');
+            const fixos = [...estado.fixos].sort((a, b) => (a.dia || 99) - (b.dia || 99));
+            document.getElementById('txt-qtd-fixos').textContent = `${fixos.length} ativo${fixos.length === 1 ? '' : 's'}`;
+            if (!fixos.length) {
+                lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhum gasto fixo cadastrado.</div>';
+                return;
+            }
+            lista.innerHTML = fixos.map(f => `
+                <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/40 rounded-2xl px-4 py-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-200 truncate">${escaparHtml(f.desc)}</p>
+                        <p class="text-[11px] text-slate-500">${f.dia ? 'Vence dia ' + f.dia : 'Sem dia definido'}${f.parcelas ? ' · ' + f.parcelas + ' parcelas' : ''}</p>
+                    </div>
+                    <div class="flex items-center space-x-3 shrink-0">
+                        <span class="text-sm font-bold text-amber-400">${formatarMoeda(f.valor)}</span>
+                        <button onclick="removerGastoFixo(${f.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderizarCofrinho() {
+            const c = calcularCofrinho();
+            document.getElementById('txt-total-cofrinho').textContent = formatarMoeda(c.total);
+            document.getElementById('txt-rendimento-mes').textContent = '+ ' + formatarMoeda(c.rendimentoMes);
+            document.getElementById('txt-total-investido').textContent = formatarMoeda(c.investido);
+            document.getElementById('txt-total-juros').textContent = formatarMoeda(c.juros);
+        }
+
+        function renderizarTudo() {
+            renderizarCalendario();
+            renderizarResumo();
+            renderizarGrafico();
+            renderizarExtrato();
+            renderizarFixos();
+            renderizarCofrinho();
+        }
+
+        // ---------- Inicialização ----------
+        document.getElementById('select-banco').value = estado.banco;
+        document.getElementById('input-aporte').value = estado.aporte;
+        document.getElementById('input-meses').value = estado.meses;
+        document.getElementById('input-pergunta-ia').addEventListener('keydown', e => {
+            if (e.key === 'Enter') enviarMensagemIA();
+        });
+        ['modal-transacao', 'modal-fixo', 'modal-config'].forEach(id => {
+            document.getElementById(id).addEventListener('click', e => {
+                if (e.target.id === id) fecharModal(id);
+            });
+        });
+        renderizarTudo();
+    </script>
+</body>
+</html>
