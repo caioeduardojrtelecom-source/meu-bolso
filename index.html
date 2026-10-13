@@ -40,7 +40,7 @@
                 <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Disponível no Mês</p>
+                        <p id="txt-mes-referencia" class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Mês Atual</p>
                         <h2 id="txt-saldo" class="text-3xl font-extrabold text-emerald-400 mt-1">R$ 0,00</h2>
                     </div>
                     <span id="txt-taxa-poupanca" class="bg-emerald-500/20 text-emerald-300 text-xs px-2.5 py-1 rounded-full font-semibold border border-emerald-500/30">
@@ -54,7 +54,7 @@
                         <p id="txt-renda" class="text-xs font-bold text-slate-200 mt-0.5">R$ 0</p>
                     </div>
                     <div>
-                        <p class="text-[10px] text-slate-400">Gastos Fixos</p>
+                        <p class="text-[10px] text-slate-400">Fixos/Dívidas</p>
                         <p id="txt-total-fixos" class="text-xs font-bold text-amber-400 mt-0.5">R$ 0</p>
                     </div>
                     <div>
@@ -67,7 +67,7 @@
             <!-- Gráfico de Gastos -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg">
                 <h3 class="font-bold text-sm text-slate-300 mb-4 flex items-center justify-between">
-                    <span>Distribuição de Gastos</span>
+                    <span>Distribuição de Gastos do Mês</span>
                     <i class="fa-solid fa-chart-pie text-slate-500"></i>
                 </h3>
                 <div class="relative w-full h-48 flex items-center justify-center">
@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <!-- Calendário Interativo com Dívidas por Data -->
+            <!-- Calendário Interativo com Navegação Simultânea -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
                 <div class="flex items-center justify-between">
                     <button onclick="mudarMesCalendario(-1)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
@@ -87,7 +87,7 @@
                     </button>
                 </div>
                 <p class="text-[11px] text-emerald-400 text-center bg-emerald-500/10 py-1.5 rounded-xl border border-emerald-500/20">
-                    <i class="fa-solid fa-hand-pointer mr-1"></i> Toque em qualquer dia para ver as dívidas!
+                    <i class="fa-solid fa-hand-pointer mr-1"></i> Toque em qualquer dia para ver os lançamentos!
                 </p>
                 <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-500 font-semibold">
                     <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
@@ -115,24 +115,24 @@
         <section id="tab-transacoes" class="space-y-6 hidden">
             <button onclick="abrirModalTransacao()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-plus-circle text-lg"></i>
-                <span>Adicionar Gasto Variável</span>
+                <span>Adicionar Gasto ou Ganho Extra</span>
             </button>
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
-                <h3 class="font-bold text-sm text-slate-300">Extrato de Gastos Variáveis</h3>
+                <h3 class="font-bold text-sm text-slate-300">Extrato de Lançamentos</h3>
                 <div id="lista-extrato" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
                     <div class="text-center py-8 text-slate-500 text-sm">Nenhuma transação registrada.</div>
                 </div>
             </div>
         </section>
 
-        <!-- ABA 3: FIXOS -->
+        <!-- ABA 3: FIXOS E DÍVIDAS COM PRAZO -->
         <section id="tab-fixos" class="space-y-6 hidden">
             <button onclick="abrirModalGastoFixo()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-calendar-plus text-lg"></i>
-                <span>Adicionar Gasto Fixo com Vencimento</span>
+                <span>Adicionar Dívida / Gasto Fixo com Prazo</span>
             </button>
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
-                <h3 class="font-bold text-sm text-slate-300">Compromissos Fixos no Calendário</h3>
+                <h3 class="font-bold text-sm text-slate-300">Dívidas e Prazos Cadastrados</h3>
                 <div id="lista-fixos" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
                     <div class="text-center py-8 text-slate-500 text-sm">Nenhum gasto fixo cadastrado.</div>
                 </div>
@@ -173,24 +173,16 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Assistente Inteligente AI</h3>
-                    <p class="text-xs text-slate-400">Respostas coerentes baseadas nos seus gastos.</p>
+                    <p class="text-xs text-slate-400">Analisa o mês selecionado no calendário.</p>
                 </div>
-                <button onclick="alternarVoz()" id="btn-voz" title="Ativar/Desativar Voz" class="ml-auto w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 transition">
-                    <i id="icone-voz" class="fa-solid fa-volume-xmark text-sm"></i>
-                </button>
             </div>
-
             <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
                 <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
-                    Olá, Caio! Já estou pronta. Pergunte quanto pode gastar por dia ou sobre suas dívidas do calendário.
+                    Olá, Caio! Já estou sincronizada com o mês que você selecionar no calendário. Pode perguntar!
                 </div>
             </div>
-
             <div class="flex items-center space-x-2 shrink-0 pt-2">
-                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quais dívidas tenho dia 10?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-                <button onclick="alternarMicrofone()" id="btn-microfone" class="w-12 h-12 shrink-0 bg-slate-800 text-slate-200 rounded-2xl flex items-center justify-center">
-                    <i class="fa-solid fa-microphone text-sm"></i>
-                </button>
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar neste mês?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
                 <button onclick="enviarMensagemIA()" class="w-12 h-12 shrink-0 bg-emerald-500 text-slate-950 rounded-2xl flex items-center justify-center font-bold shadow-lg">
                     <i class="fa-solid fa-paper-plane text-sm"></i>
                 </button>
@@ -199,7 +191,7 @@
 
     </main>
 
-    <!-- Modal Detalhes do Dia (Dívidas da Data) -->
+    <!-- Modal Detalhes do Dia -->
     <div id="modal-dia" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl text-center">
             <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl">
@@ -220,41 +212,61 @@
         <button onclick="mudarAba('ia')" id="btn-tab-ia" class="flex flex-col items-center text-slate-500 py-1"><i class="fa-solid fa-brain text-sm mb-1"></i><span class="text-[9px]">AI Bot</span></button>
     </nav>
 
-    <!-- Modal Transação -->
+    <!-- Modal Transação / Ganho Extra -->
     <div id="modal-transacao" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
-                <h3 class="font-bold text-base text-slate-200">Novo Gasto Variável</h3>
+                <h3 class="font-bold text-base text-slate-200">Lançamento (Gasto ou Ganho)</h3>
                 <button onclick="fecharModalTransacao()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <input type="text" id="trans-desc" placeholder="Descrição (Ex: Mercado)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <input type="text" id="trans-desc" placeholder="Descrição (Ex: Venda extra, Mercado)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div class="grid grid-cols-2 gap-3">
                 <input type="number" id="trans-valor" step="0.01" placeholder="Valor R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
                 <input type="date" id="trans-data" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200">
             </div>
-            <select id="trans-categoria" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200">
-                <option value="Alimentação">Alimentação</option>
-                <option value="Transporte">Transporte</option>
-                <option value="Lazer">Lazer</option>
-                <option value="Outros">Outros</option>
-            </select>
-            <button onclick="salvarTransacao()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Gasto</button>
+            <div class="grid grid-cols-2 gap-3">
+                <select id="trans-tipo" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200">
+                    <option value="gasto">Gasto Variável (-)</option>
+                    <option value="ganho">Ganho Extra (+)</option>
+                </select>
+                <select id="trans-categoria" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200">
+                    <option value="Outros">Outros</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Salário/Extra">Salário/Extra</option>
+                </select>
+            </div>
+            <button onclick="salvarTransacao()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Lançamento</button>
         </div>
     </div>
 
-    <!-- Modal Fixo -->
+    <!-- Modal Dívida com Prazo Fim -->
     <div id="modal-fixo" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-base text-slate-200">Nova Dívida / Gasto Fixo</h3>
                 <button onclick="fecharModalGastoFixo()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <input type="text" id="fixo-desc" placeholder="Nome da Dívida (Ex: Aluguel)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <input type="text" id="fixo-desc" placeholder="Nome (Ex: Empréstimo, Aluguel)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div class="grid grid-cols-2 gap-3">
-                <input type="number" id="fixo-valor" step="0.01" placeholder="Valor R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
-                <input type="number" id="fixo-dia" min="1" max="31" placeholder="Dia do Vencimento" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+                <input type="number" id="fixo-valor" step="0.01" placeholder="Valor Mensal R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+                <input type="number" id="fixo-dia" min="1" max="31" placeholder="Dia Vencimento" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             </div>
-            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar na Data</button>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-[10px] text-slate-400">Mês de Término</label>
+                    <select id="fixo-mes-fim" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 mt-1">
+                        <option value="">Sem fim (Contínuo)</option>
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400">Ano de Término</label>
+                    <input type="number" id="fixo-ano-fim" placeholder="Ex: 2027" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 mt-1">
+                </div>
+            </div>
+            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Dívida</button>
         </div>
     </div>
 
@@ -266,24 +278,21 @@
                 <button onclick="fecharConfiguracoes()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <input type="text" id="config-nome" placeholder="Seu Nome" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
-            <input type="number" id="config-renda" placeholder="Renda Mensal R$" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
-            <input type="number" id="config-dia-pagamento" placeholder="Dia do Pagamento" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
-            <div>
-                <label class="text-xs text-amber-400">Chave API Groq (Opcional - para IA)</label>
-                <input type="password" id="config-api-key" placeholder="gsk_..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1">
-            </div>
-            <button onclick="salvarConfiguracoes()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar</button>
+            <input type="number" id="config-renda" placeholder="Salário Base Mensal R$" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <input type="number" id="config-dia-pagamento" placeholder="Dia que recebe o salário" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <input type="password" id="config-api-key" placeholder="Chave API Groq (Opcional)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <button onclick="salvarConfiguracoes()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Configurações</button>
         </div>
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v10';
+        const STORAGE_KEY = 'meu-bolso-ai-v11';
         let estado = carregarEstado();
         let grafico = null;
-        let dataVisualizacaoCalendario = new Date();
+        let dataVisualizacaoCalendario = new Date(); // Controla o mês selecionado no app todo
 
         function carregarEstado() {
-            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, vozAtiva: false, apiKey: '' };
+            const padrao = { nome: 'Caio', renda: 5000, transacoes: [], fixos: [], banco: 'nubank', aporte: 500, meses: 12, diaPagamento: null, apiKey: '' };
             try {
                 const salvo = JSON.parse(localStorage.getItem(STORAGE_KEY));
                 return salvo ? { ...padrao, ...salvo } : padrao;
@@ -310,6 +319,8 @@
             document.getElementById('fixo-desc').value = '';
             document.getElementById('fixo-valor').value = '';
             document.getElementById('fixo-dia').value = '';
+            document.getElementById('fixo-mes-fim').value = '';
+            document.getElementById('fixo-ano-fim').value = '';
             document.getElementById('modal-fixo').classList.remove('hidden');
         }
         function fecharModalGastoFixo() { document.getElementById('modal-fixo').classList.add('hidden'); }
@@ -322,36 +333,38 @@
             document.getElementById('modal-config').classList.remove('hidden');
         }
         function fecharConfiguracoes() { document.getElementById('modal-config').classList.add('hidden'); }
-
         function fecharModalDia() { document.getElementById('modal-dia').classList.add('hidden'); }
 
-        function calcularTotais() {
-            const hoje = new Date();
-            const transacoesMes = estado.transacoes.filter(t => {
-                if (!t.data) return false;
-                const [ano, mes] = t.data.split('-').map(Number);
-                return ano === hoje.getFullYear() && mes === hoje.getMonth() + 1;
-            });
-            const totalVariavel = transacoesMes.reduce((s, t) => s + Number(t.valor), 0);
-            const totalFixos = estado.fixos.reduce((s, f) => s + Number(f.valor), 0);
-            const aporte = Number(estado.aporte) || 0;
-            const saldo = Number(estado.renda) - totalFixos - totalVariavel - aporte;
-            return { transacoesMes, totalVariavel, totalFixos, aporte, saldo };
+        // Verifica se uma dívida está ativa no ano/mês atualmente selecionado no calendário
+        function dividaAtivaNoMes(f, anoVis, mesVis) {
+            if (!f.mesFim || !f.anoFim) return true; // Sem prazo = contínua
+            const mesFim = Number(f.mesFim);
+            const anoFim = Number(f.anoFim);
+            if (anoVis < anoFim) return true;
+            if (anoVis === anoFim && mesVis <= mesFim) return true;
+            return false;
         }
 
-        function calcularDatas() {
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
-            const diasRestantesMes = ultimoDiaMes - hoje.getDate() + 1;
-            let proximoPagamento = null, diasAtePagamento = null;
-            if (estado.diaPagamento) {
-                const dataPagamento = (ano, mes) => new Date(ano, mes, Math.min(estado.diaPagamento, new Date(ano, mes + 1, 0).getDate()));
-                proximoPagamento = dataPagamento(hoje.getFullYear(), hoje.getMonth());
-                if (proximoPagamento <= hoje) proximoPagamento = dataPagamento(hoje.getFullYear(), hoje.getMonth() + 1);
-                diasAtePagamento = Math.round((proximoPagamento - hoje) / 86400000);
-            }
-            return { hoje, ultimoDiaMes, diasRestantesMes, proximoPagamento, diasAtePagamento };
+        function calcularTotaisMes(anoVis, mesVis) {
+            // 1. Filtrar transações (gastos e ganhos extras) apenas do mês/ano visualizado
+            const transacoesMes = estado.transacoes.filter(t => {
+                if (!t.data) return false;
+                const [tAno, tMes] = t.data.split('-').map(Number);
+                return tAno === anoVis && tMes === mesVis;
+            });
+
+            const totalVariavel = transacoesMes.filter(t => t.tipo !== 'ganho').reduce((s, t) => s + Number(t.valor), 0);
+            const totalGanhosExtras = transacoesMes.filter(t => t.tipo === 'ganho').reduce((s, t) => s + Number(t.valor), 0);
+
+            // 2. Filtrar dívidas fixas ativas neste mês/ano
+            const fixosAtivos = estado.fixos.filter(f => dividaAtivaNoMes(f, anoVis, mesVis));
+            const totalFixos = fixosAtivos.reduce((s, f) => s + Number(f.valor), 0);
+
+            const rendaTotalMes = Number(estado.renda) + totalGanhosExtras;
+            const aporte = Number(estado.aporte) || 0;
+            const saldo = rendaTotalMes - totalFixos - totalVariavel - aporte;
+
+            return { transacoesMes, totalVariavel, totalGanhosExtras, fixosAtivos, totalFixos, rendaTotalMes, saldo };
         }
 
         function mudarAba(aba) {
@@ -369,9 +382,10 @@
             const desc = document.getElementById('trans-desc').value.trim();
             const valor = parseFloat(document.getElementById('trans-valor').value);
             const data = document.getElementById('trans-data').value || hojeIso();
+            const tipo = document.getElementById('trans-tipo').value;
             const categoria = document.getElementById('trans-categoria').value;
             if (!desc || !(valor > 0)) { alert('Preencha a descrição e um valor válido.'); return; }
-            estado.transacoes.push({ id: Date.now(), desc, valor, data, categoria });
+            estado.transacoes.push({ id: Date.now(), desc, valor, data, tipo, categoria });
             salvarEstado();
             fecharModalTransacao();
             renderizarTudo();
@@ -387,8 +401,10 @@
             const desc = document.getElementById('fixo-desc').value.trim();
             const valor = parseFloat(document.getElementById('fixo-valor').value);
             const dia = parseInt(document.getElementById('fixo-dia').value, 10);
-            if (!desc || !(valor > 0) || !dia || dia < 1 || dia > 31) { alert('Preencha a descrição, valor e um dia válido (1 a 31).'); return; }
-            estado.fixos.push({ id: Date.now(), desc, valor, dia });
+            const mesFim = document.getElementById('fixo-mes-fim').value;
+            const anoFim = document.getElementById('fixo-ano-fim').value;
+            if (!desc || !(valor > 0) || !dia || dia < 1 || dia > 31) { alert('Preencha a descrição, valor e dia válido.'); return; }
+            estado.fixos.push({ id: Date.now(), desc, valor, dia, mesFim: mesFim || null, anoFim: anoFim ? Number(anoFim) : null });
             salvarEstado();
             fecharModalGastoFixo();
             renderizarTudo();
@@ -405,8 +421,7 @@
             estado.aporte = parseFloat(document.getElementById('input-aporte').value) || 0;
             estado.meses = parseInt(document.getElementById('input-meses').value, 10) || 0;
             salvarEstado();
-            renderizarResumo();
-            renderizarCofrinho();
+            renderizarTudo();
         }
 
         function salvarConfiguracoes() {
@@ -421,40 +436,39 @@
 
         function mudarMesCalendario(direcao) {
             dataVisualizacaoCalendario.setMonth(dataVisualizacaoCalendario.getMonth() + direcao);
-            renderizarCalendario();
+            renderizarTudo();
         }
 
-        // Interação ao clicar no dia do calendário (Lê tanto Fixos quanto Variáveis daquela data)
+        // Clique no dia do calendário para ver dívidas ou lançamentos daquela data no mês selecionado
         function clicarDiaCalendario(dia, ano, mes) {
             const nomeMes = new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month: 'long' });
             
-            // Procura gastos fixos que vencem nesse dia
-            const fixosDoDia = estado.fixos.filter(f => f.dia === dia);
+            // Dívidas ativas neste mês que vencem neste dia
+            const fixosDoDia = estado.fixos.filter(f => f.dia === dia && dividaAtivaNoMes(f, ano, mes + 1));
             
-            // Procura transações variáveis cadastradas exatamente nesta data (YYYY-MM-DD)
-            const mesStr = String(mes + 1).padStart(2, '0');
-            const diaStr = String(dia).padStart(2, '0');
-            const dataIsoAlvo = `${ano}-${mesStr}-${diaStr}`;
-            const variaveisDoDia = estado.transacoes.filter(t => t.data === dataIsoAlvo);
+            // Transações daquela data exata
+            const dataIsoAlvo = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+            const transDoDia = estado.transacoes.filter(t => t.data === dataIsoAlvo);
 
-            const todasDividas = [...fixosDoDia, ...variaveisDoDia];
+            const itensDoDia = [...fixosDoDia, ...transDoDia];
             
             const titulo = document.getElementById('modal-dia-titulo');
             const conteudo = document.getElementById('modal-dia-conteudo');
-            
             titulo.textContent = `${dia} de ${nomeMes} de ${ano}`;
 
-            if (todasDividas.length > 0) {
-                let html = `<p class="text-amber-400 font-semibold mb-2">Você tem ${todasDividas.length} registro(s) nesta data:</p>`;
-                todasDividas.forEach(d => {
+            if (itensDoDia.length > 0) {
+                let html = `<p class="text-amber-400 font-semibold mb-2">${itensDoDia.length} registro(s) nesta data:</p>`;
+                itensDoDia.forEach(d => {
+                    const cor = d.tipo === 'ganho' ? 'text-emerald-400' : 'text-amber-400';
+                    const sinal = d.type === 'ganho' ? '+' : '-';
                     html += `<div class="bg-slate-800 p-2.5 rounded-xl mb-1 flex justify-between items-center">
                         <span class="text-slate-200 font-medium">${escaparHtml(d.desc)}</span>
-                        <span class="text-amber-400 font-bold">${formatarMoeda(d.valor)}</span>
+                        <span class="${cor} font-bold">${sinal} ${formatarMoeda(d.valor)}</span>
                     </div>`;
                 });
                 conteudo.innerHTML = html;
             } else {
-                conteudo.innerHTML = `<p class="text-emerald-400 font-medium py-3"><i class="fa-solid fa-circle-check text-lg mb-1 block"></i>Você não tem dívidas nessa data.</p>`;
+                conteudo.innerHTML = `<p class="text-emerald-400 font-medium py-3"><i class="fa-solid fa-circle-check text-lg mb-1 block"></i>Nenhuma dívida ou gasto nesta data.</p>`;
             }
 
             document.getElementById('modal-dia').classList.add('flex');
@@ -463,27 +477,30 @@
 
         function renderizarCalendario() {
             const ano = dataVisualizacaoCalendario.getFullYear();
-            const mes = dataVisualizacaoCalendario.getMonth();
-            document.getElementById('txt-calendario-mes').textContent = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const mes = dataVisualizacaoCalendario.getMonth(); // 0 a 11
+            const mesVis = mes + 1;
             
+            const nomeMesFormatado = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            document.getElementById('txt-calendario-mes').textContent = nomeMesFormatado.charAt(0).toUpperCase() + nomeMesFormatado.slice(1);
+            document.getElementById('txt-mes-referencia').textContent = `Mês: ${nomeMesFormatado}`;
+
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
             const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
-            
-            // Mapeia dias com dívidas fixas
-            const diasComDivida = {};
+
+            // Mapeia dias com dívidas fixas ativas no mês
+            const diasComCompromisso = {};
             estado.fixos.forEach(f => {
-                if (f.dia) {
-                    diasComDivida[f.dia] = (diasComDivida[f.dia] || 0) + 1;
+                if (f.dia && dividaAtivaNoMes(f, ano, mesVis)) {
+                    diasComCompromisso[f.dia] = true;
                 }
             });
 
-            // Mapeia dias com gastos variáveis no mês visualizado
-            const mesStr = String(mes + 1).padStart(2, '0');
+            // Mapeia dias com transações no mês/ano visualizado
             estado.transacoes.forEach(t => {
                 if (t.data) {
                     const [tAno, tMes, tDia] = t.data.split('-').map(Number);
-                    if (tAno === ano && tMes === mes + 1) {
-                        diasComDivida[tDia] = (diasComDivida[tDia] || 0) + 1;
+                    if (tAno === ano && tMes === mesVis) {
+                        diasComCompromisso[tDia] = true;
                     }
                 }
             });
@@ -492,45 +509,55 @@
             for (let i = 0; i < primeiroDiaSemana; i++) html += '<span></span>';
             
             for (let dia = 1; dia <= ultimoDiaMes; dia++) {
-                const ehHoje = dia === new Date().getDate() && mes === new Date().getMonth() && ano === new Date().getFullYear();
-                const temDivida = diasComDivida[dia];
+                const hoje = new Date();
+                const ehHoje = dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear();
+                const temCompromisso = diasComCompromisso[dia];
                 
                 let classes = 'h-10 flex flex-col items-center justify-center rounded-xl cursor-pointer transition relative ';
                 if (ehHoje) {
                     classes += 'bg-emerald-500 text-slate-950 font-bold shadow-md ';
-                } else if (temDivida) {
+                } else if (temCompromisso) {
                     classes += 'bg-amber-500/25 border border-amber-500/50 text-amber-300 font-semibold hover:bg-amber-500/35 ';
                 } else {
                     classes += 'bg-slate-800/40 text-slate-300 hover:bg-slate-700/60 ';
                 }
 
-                const indicador = temDivida ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5 shadow"></span>` : `<span class="h-1.5 mt-0.5"></span>`;
+                const indicador = temCompromisso ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5 shadow"></span>` : `<span class="h-1.5 mt-0.5"></span>`;
                 html += `<div onclick="clicarDiaCalendario(${dia}, ${ano}, ${mes})" class="${classes}"><span>${dia}</span>${indicador}</div>`;
             }
             document.getElementById('grade-calendario').innerHTML = html;
 
-            const d = calcularDatas();
-            const t = calcularTotais();
-            const diasBase = d.diasAtePagamento || d.diasRestantesMes;
+            // Cálculos dinâmicos baseados no mês selecionado
+            const totais = calcularTotaisMes(ano, mesVis);
+            const diasRestantes = ultimoDiaMes - new Date().getDate() + 1;
             document.getElementById('txt-dias-mes').textContent = ultimoDiaMes;
-            document.getElementById('txt-dias-pagamento').textContent = d.diasAtePagamento ?? '-';
-            document.getElementById('txt-gasto-dia').textContent = formatarMoeda(Math.max(0, t.saldo) / diasBase);
+            document.getElementById('txt-dias-pagamento').textContent = estado.diaPagamento ? `${estado.diaPagamento}` : '-';
+            document.getElementById('txt-gasto-dia').textContent = formatarMoeda(Math.max(0, totais.saldo) / Math.max(1, diasRestantes));
         }
 
         function renderizarResumo() {
-            const t = calcularTotais();
-            document.getElementById('txt-saldo').textContent = formatarMoeda(t.saldo);
-            document.getElementById('txt-taxa-poupanca').textContent = `${estado.renda > 0 ? Math.round((t.aporte / estado.renda) * 100) : 0}% guardado`;
-            document.getElementById('txt-renda').textContent = formatarMoeda(estado.renda);
-            document.getElementById('txt-total-fixos').textContent = formatarMoeda(t.totalFixos);
-            document.getElementById('txt-total-gasto').textContent = formatarMoeda(t.totalVariavel);
+            const ano = dataVisualizacaoCalendario.getFullYear();
+            const mesVis = dataVisualizacaoCalendario.getMonth() + 1;
+            const totais = calcularTotaisMes(ano, mesVis);
+
+            document.getElementById('txt-saldo').textContent = formatarMoeda(totais.saldo);
+            document.getElementById('txt-taxa-poupanca').textContent = `${totais.rendaTotalMes > 0 ? Math.round((estado.aporte / totais.rendaTotalMes) * 100) : 0}% guardado`;
+            document.getElementById('txt-renda').textContent = formatarMoeda(totais.rendaTotalMes);
+            document.getElementById('txt-total-fixos').textContent = formatarMoeda(totais.totalFixos);
+            document.getElementById('txt-total-gasto').textContent = formatarMoeda(totais.totalVariavel);
         }
 
         function renderizarGrafico() {
             if (typeof Chart === 'undefined') return;
-            const t = calcularTotais();
-            const porCat = { 'Fixos': t.totalFixos };
-            t.transacoesMes.forEach(x => porCat[x.categoria] = (porCat[x.categoria] || 0) + x.valor);
+            const ano = dataVisualizacaoCalendario.getFullYear();
+            const mesVis = dataVisualizacaoCalendario.getMonth() + 1;
+            const totais = calcularTotaisMes(ano, mesVis);
+
+            const porCat = { 'Dívidas/Fixos': totais.totalFixos };
+            totais.transacoesMes.filter(t => t.tipo !== 'ganho').forEach(x => {
+                porCat[x.categoria] = (porCat[x.categoria] || 0) + Number(x.valor);
+            });
+
             const labels = Object.keys(porCat).filter(k => porCat[k] > 0);
             const valores = labels.map(l => porCat[l]);
 
@@ -544,22 +571,37 @@
 
         function renderizarExtrato() {
             const lista = document.getElementById('lista-extrato');
-            if (!estado.transacoes.length) { lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhuma transação.</div>'; return; }
-            lista.innerHTML = estado.transacoes.slice().reverse().map(t => `
+            if (!estado.transacoes.length) { lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhum lançamento.</div>'; return; }
+            lista.innerHTML = estado.transacoes.slice().reverse().map(t => {
+                const cor = t.tipo === 'ganho' ? 'text-emerald-400' : 'text-rose-400';
+                const sinal = t.tipo === 'ganho' ? '+' : '-';
+                return `
                 <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/40 rounded-2xl px-4 py-3">
                     <div><p class="text-sm font-semibold text-slate-200">${escaparHtml(t.desc)}</p><p class="text-[11px] text-slate-500">${t.categoria} · ${t.data.split('-').reverse().join('/')}</p></div>
-                    <div class="flex items-center space-x-3"><span class="text-sm font-bold text-rose-400">- ${formatarMoeda(t.valor)}</span><button onclick="removerTransacao(${t.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
-                </div>`).join('');
+                    <div class="flex items-center space-x-3"><span class="text-sm font-bold ${cor}">${sinal} ${formatarMoeda(t.valor)}</span><button onclick="removerTransacao(${t.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
+                </div>`;
+            }).join('');
         }
 
         function renderizarFixos() {
             const lista = document.getElementById('lista-fixos');
-            if (!estado.fixos.length) { lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhum gasto fixo.</div>'; return; }
-            lista.innerHTML = estado.fixos.map(f => `
+            const anoVis = dataVisualizacaoCalendario.getFullYear();
+            const mesVis = dataVisualizacaoCalendario.getMonth() + 1;
+
+            if (!estado.fixos.length) { lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhuma dívida cadastrada.</div>'; return; }
+            lista.innerHTML = estado.fixos.map(f => {
+                const ativa = dividaAtivaNoMes(f, anoVis, mesVis);
+                const statusPrazo = f.mesFim ? `Até ${f.mesFim}/${f.anoFim}` : 'Contínuo';
+                const badge = ativa ? `<span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-medium">Ativa neste mês</span>` : `<span class="text-[10px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full">Encerrada</span>`;
+                return `
                 <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/40 rounded-2xl px-4 py-3">
-                    <div><p class="text-sm font-semibold text-slate-200">${escaparHtml(f.desc)}</p><p class="text-[11px] text-amber-400 font-semibold">Vencimento todo dia ${f.dia}</p></div>
+                    <div>
+                        <div class="flex items-center space-x-2"><p class="text-sm font-semibold text-slate-200">${escaparHtml(f.desc)}</p>${badge}</div>
+                        <p class="text-[11px] text-amber-400 font-semibold">Vencimento dia ${f.dia} (${statusPrazo})</p>
+                    </div>
                     <div class="flex items-center space-x-3"><span class="text-sm font-bold text-amber-400">${formatarMoeda(f.valor)}</span><button onclick="removerGastoFixo(${f.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
         function renderizarCofrinho() {
@@ -581,85 +623,28 @@
             renderizarCofrinho();
         }
 
-        // IA
-        function adicionarMensagem(texto, doUsuario) {
-            const chat = document.getElementById('chat-mensagens');
-            const div = document.createElement('div');
-            div.className = doUsuario ? 'bg-emerald-500 text-slate-950 text-xs p-3.5 rounded-2xl max-w-[85%] self-end font-medium' : 'bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start';
-            div.textContent = texto;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-            if (!doUsuario) falar(texto);
-        }
-
+        // IA Adaptada ao Mês Selecionado
         async function enviarMensagemIA() {
             const input = document.getElementById('input-pergunta-ia');
             const pergunta = input.value.trim();
             if (!pergunta) return;
-            adicionarMensagem(pergunta, true);
+            
+            const chat = document.getElementById('chat-mensagens');
+            chat.innerHTML += `<div class="bg-emerald-500 text-slate-950 text-xs p-3.5 rounded-2xl max-w-[85%] self-end font-medium">${escaparHtml(pergunta)}</div>`;
             input.value = '';
+            chat.scrollTop = chat.scrollHeight;
 
-            const t = calcularTotais();
-            const d = calcularDatas();
-            const diasBase = d.diasAtePagamento || d.diasRestantesMes;
-            const gastoDiario = Math.max(0, t.saldo) / diasBase;
+            const ano = dataVisualizacaoCalendario.getFullYear();
+            const mesVis = dataVisualizacaoCalendario.getMonth() + 1;
+            const nomeMes = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const totais = calcularTotaisMes(ano, mesVis);
 
-            const pLower = pergunta.toLowerCase();
-            let resposta = "";
+            let resposta = `Para o mês de ${nomeMes}: Renda total R$ ${totais.rendaTotalMes.toFixed(2)}, Dívidas fixas R$ ${totais.totalFixos.toFixed(2)}, Gastos variáveis R$ ${totais.totalVariavel.toFixed(2)} e saldo livre de R$ ${totais.saldo.toFixed(2)}.`;
 
-            if (pLower.includes('gastar') || pLower.includes('dia') || pLower.includes('quanto')) {
-                resposta = `Caio, considerando seu saldo livre de ${formatarMoeda(t.saldo)}, você pode gastar cerca de ${formatarMoeda(gastoDiario)} por dia.`;
-            } else if (pLower.includes('fixo') || pLower.includes('conta') || pLower.includes('dívida') || pLower.includes('divida')) {
-                resposta = `Você tem ${estado.fixos.length} dívidas fixas cadastradas, somando ${formatarMoeda(t.totalFixos)} por mês. Toque em qualquer dia do calendário para ver os detalhes!`;
-            } else {
-                resposta = `Com saldo livre de ${formatarMoeda(t.saldo)}, sua média diária é de ${formatarMoeda(gastoDiario)}.`;
-            }
-
-            if (estado.apiKey) {
-                try {
-                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${estado.apiKey}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            model: 'llama-3.3-70b-versatile',
-                            messages: [{ role: 'system', content: 'Você é um assistente financeiro direto.' }, { role: 'user', content: pergunta }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.choices && data.choices[0]) {
-                        adicionarMensagem(data.choices[0].message.content, false);
-                        return;
-                    }
-                } catch (e) { console.error(e); }
-            }
-
-            setTimeout(() => { adicionarMensagem(resposta, false); }, 400);
-        }
-
-        function falar(texto) {
-            if (!estado.vozAtiva || !('speechSynthesis' in window)) return;
-            speechSynthesis.cancel();
-            const fala = new SpeechSynthesisUtterance(texto);
-            fala.lang = 'pt-BR';
-            speechSynthesis.speak(fala);
-        }
-
-        function alternarVoz() {
-            if (!('speechSynthesis' in window)) return alert('Navegador não suporta voz.');
-            estado.vozAtiva = !estado.vozAtiva;
-            salvarEstado();
-            const icone = document.getElementById('icone-voz');
-            icone.className = 'fa-solid text-sm ' + (estado.vozAtiva ? 'fa-volume-high text-emerald-400' : 'fa-volume-xmark text-slate-400');
-            if (estado.vozAtiva) falar('Voz ativada.');
-        }
-
-        const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
-        function alternarMicrofone() {
-            if (!Reconhecimento) return alert('Reconhecimento não suportado.');
-            const rec = new Reconhecimento();
-            rec.lang = 'pt-BR';
-            rec.onresult = e => { document.getElementById('input-pergunta-ia').value = e.results[0][0].transcript; enviarMensagemIA(); };
-            rec.start();
+            setTimeout(() => {
+                chat.innerHTML += `<div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">${escaparHtml(resposta)}</div>`;
+                chat.scrollTop = chat.scrollHeight;
+            }, 400);
         }
 
         document.getElementById('select-banco').value = estado.banco;
