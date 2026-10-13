@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <!-- Calendário Interativo -->
+            <!-- Calendário Interativo com Dívidas por Data -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
                 <div class="flex items-center justify-between">
                     <button onclick="mudarMesCalendario(-1)" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
@@ -86,11 +86,14 @@
                         <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                 </div>
-                <p id="txt-hoje" class="text-xs text-slate-400 -mt-2 capitalize text-center"></p>
+                <p class="text-[11px] text-emerald-400 text-center bg-emerald-500/10 py-1.5 rounded-xl border border-emerald-500/20">
+                    <i class="fa-solid fa-hand-pointer mr-1"></i> Toque em qualquer dia para ver as dívidas!
+                </p>
                 <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-500 font-semibold">
                     <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
                 </div>
-                <div id="grade-calendario" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+                <div id="grade-calendario" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+                
                 <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-800/80 text-center">
                     <div>
                         <p class="text-[10px] text-slate-400">Dias no mês</p>
@@ -126,10 +129,10 @@
         <section id="tab-fixos" class="space-y-6 hidden">
             <button onclick="abrirModalGastoFixo()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-2xl shadow-lg transition flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-calendar-plus text-lg"></i>
-                <span>Adicionar Gasto Fixo</span>
+                <span>Adicionar Gasto Fixo com Vencimento</span>
             </button>
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
-                <h3 class="font-bold text-sm text-slate-300">Compromissos Fixos</h3>
+                <h3 class="font-bold text-sm text-slate-300">Compromissos Fixos no Calendário</h3>
                 <div id="lista-fixos" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
                     <div class="text-center py-8 text-slate-500 text-sm">Nenhum gasto fixo cadastrado.</div>
                 </div>
@@ -179,12 +182,12 @@
 
             <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
                 <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
-                    Olá, Caio! Já estou pronta. Pergunte quanto pode gastar por dia ou sobre suas contas.
+                    Olá, Caio! Já estou pronta. Pergunte quanto pode gastar por dia ou sobre suas dívidas do calendário.
                 </div>
             </div>
 
             <div class="flex items-center space-x-2 shrink-0 pt-2">
-                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto posso gastar por dia?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quais dívidas tenho dia 10?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
                 <button onclick="alternarMicrofone()" id="btn-microfone" class="w-12 h-12 shrink-0 bg-slate-800 text-slate-200 rounded-2xl flex items-center justify-center">
                     <i class="fa-solid fa-microphone text-sm"></i>
                 </button>
@@ -195,6 +198,18 @@
         </section>
 
     </main>
+
+    <!-- Modal Detalhes do Dia (Dívidas da Data) -->
+    <div id="modal-dia" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl text-center">
+            <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-calendar-day"></i>
+            </div>
+            <h3 id="modal-dia-titulo" class="font-bold text-base text-slate-200">Data</h3>
+            <div id="modal-dia-conteudo" class="text-xs text-slate-300 space-y-2 py-2"></div>
+            <button onclick="fecharModalDia()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-2xl text-sm transition">Fechar</button>
+        </div>
+    </div>
 
     <!-- Navegação Inferior -->
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 px-2 py-2 flex justify-around items-center z-40 max-w-md mx-auto">
@@ -227,19 +242,19 @@
         </div>
     </div>
 
-    <!-- Modal Fixo -->
+    <!-- Modal Fixo (Dívida) -->
     <div id="modal-fixo" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
-                <h3 class="font-bold text-base text-slate-200">Novo Gasto Fixo</h3>
+                <h3 class="font-bold text-base text-slate-200">Nova Dívida / Gasto Fixo</h3>
                 <button onclick="fecharModalGastoFixo()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <input type="text" id="fixo-desc" placeholder="Descrição (Ex: Aluguel)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <input type="text" id="fixo-desc" placeholder="Nome da Dívida (Ex: Aluguel, Cartão)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div class="grid grid-cols-2 gap-3">
                 <input type="number" id="fixo-valor" step="0.01" placeholder="Valor R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
-                <input type="number" id="fixo-dia" min="1" max="31" placeholder="Dia Venc." class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+                <input type="number" id="fixo-dia" min="1" max="31" placeholder="Dia do Vencimento" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             </div>
-            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Fixo</button>
+            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar na Data</button>
         </div>
     </div>
 
@@ -262,7 +277,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v8';
+        const STORAGE_KEY = 'meu-bolso-ai-v9';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
@@ -307,6 +322,8 @@
             document.getElementById('modal-config').classList.remove('hidden');
         }
         function fecharConfiguracoes() { document.getElementById('modal-config').classList.add('hidden'); }
+
+        function fecharModalDia() { document.getElementById('modal-dia').classList.add('hidden'); }
 
         function calcularTotais() {
             const hoje = new Date();
@@ -370,8 +387,8 @@
             const desc = document.getElementById('fixo-desc').value.trim();
             const valor = parseFloat(document.getElementById('fixo-valor').value);
             const dia = parseInt(document.getElementById('fixo-dia').value, 10);
-            if (!desc || !(valor > 0)) { alert('Preencha a descrição e um valor válido.'); return; }
-            estado.fixos.push({ id: Date.now(), desc, valor, dia: dia || null });
+            if (!desc || !(valor > 0) || !dia || dia < 1 || dia > 31) { alert('Preencha a descrição, valor e um dia válido (1 a 31).'); return; }
+            estado.fixos.push({ id: Date.now(), desc, valor, dia });
             salvarEstado();
             fecharModalGastoFixo();
             renderizarTudo();
@@ -407,21 +424,68 @@
             renderizarCalendario();
         }
 
+        // Interação ao clicar no dia do calendário
+        function clicarDiaCalendario(dia, ano, mes) {
+            const nomeMes = new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month: 'long' });
+            const dividasDoDia = estado.fixos.filter(f => f.dia === dia);
+            
+            const titulo = document.getElementById('modal-dia-titulo');
+            const conteudo = document.getElementById('modal-dia-conteudo');
+            
+            titulo.textContent = `${dia} de ${nomeMes} de ${ano}`;
+
+            if (dividasDoDia.length > 0) {
+                let html = `<p class="text-amber-400 font-semibold mb-2">Você tem ${dividasDoDia.length} dívida(s) nesta data:</p>`;
+                dividasDoDia.forEach(d => {
+                    html += `<div class="bg-slate-800 p-2.5 rounded-xl mb-1 flex justify-between items-center">
+                        <span class="text-slate-200 font-medium">${escaparHtml(d.desc)}</span>
+                        <span class="text-amber-400 font-bold">${formatarMoeda(d.valor)}</span>
+                    </div>`;
+                });
+                conteudo.innerHTML = html;
+            } else {
+                conteudo.innerHTML = `<p class="text-emerald-400 font-medium py-3"><i class="fa-solid fa-circle-check text-lg mb-1 block"></i>Você não tem dívidas nessa data.</p>`;
+            }
+
+            document.getElementById('modal-dia').classList.remove('hidden');
+        }
+
         function renderizarCalendario() {
             const ano = dataVisualizacaoCalendario.getFullYear();
             const mes = dataVisualizacaoCalendario.getMonth();
             document.getElementById('txt-calendario-mes').textContent = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-            document.getElementById('txt-hoje').textContent = 'Hoje: ' + new Date().toLocaleDateString('pt-BR', { dateStyle: 'full' });
-
+            
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
             const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
+            
+            const diasComDivida = {};
+            estado.fixos.forEach(f => {
+                if (f.dia) {
+                    diasComDivida[f.dia] = (diasComDivida[f.dia] || 0) + 1;
+                }
+            });
+
             let html = '';
             for (let i = 0; i < primeiroDiaSemana; i++) html += '<span></span>';
+            
             for (let dia = 1; dia <= ultimoDiaMes; dia++) {
                 const ehHoje = dia === new Date().getDate() && mes === new Date().getMonth() && ano === new Date().getFullYear();
-                html += `<span class="h-8 flex items-center justify-center rounded-lg ${ehHoje ? 'bg-emerald-500 text-slate-950 font-bold' : 'bg-slate-800/50 text-slate-200'}">${dia}</span>`;
+                const temDivida = diasComDivida[dia];
+                
+                let classes = 'h-10 flex flex-col items-center justify-center rounded-xl cursor-pointer transition relative ';
+                if (ehHoje) {
+                    classes += 'bg-emerald-500 text-slate-950 font-bold shadow-md ';
+                } else if (temDivida) {
+                    classes += 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-semibold hover:bg-amber-500/30 ';
+                } else {
+                    classes += 'bg-slate-800/40 text-slate-300 hover:bg-slate-700/60 ';
+                }
+
+                const indicador = temDivida ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5"></span>` : `<span class="h-1.5 mt-0.5"></span>`;
+                html += `<div onclick="clicarDiaCalendario(${dia}, ${ano}, ${mes})" class="${classes}"><span>${dia}</span>${indicador}</div>`;
             }
             document.getElementById('grade-calendario').innerHTML = html;
+
             const d = calcularDatas();
             const t = calcularTotais();
             const diasBase = d.diasAtePagamento || d.diasRestantesMes;
@@ -470,7 +534,7 @@
             if (!estado.fixos.length) { lista.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">Nenhum gasto fixo.</div>'; return; }
             lista.innerHTML = estado.fixos.map(f => `
                 <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/40 rounded-2xl px-4 py-3">
-                    <div><p class="text-sm font-semibold text-slate-200">${escaparHtml(f.desc)}</p><p class="text-[11px] text-slate-500">Vence dia ${f.dia || 'N/D'}</p></div>
+                    <div><p class="text-sm font-semibold text-slate-200">${escaparHtml(f.desc)}</p><p class="text-[11px] text-amber-400 font-semibold">Vencimento todo dia ${f.dia}</p></div>
                     <div class="flex items-center space-x-3"><span class="text-sm font-bold text-amber-400">${formatarMoeda(f.valor)}</span><button onclick="removerGastoFixo(${f.id})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can text-xs"></i></button></div>
                 </div>`).join('');
         }
@@ -494,7 +558,7 @@
             renderizarCofrinho();
         }
 
-        // IA Coerente e Direta
+        // IA
         function adicionarMensagem(texto, doUsuario) {
             const chat = document.getElementById('chat-mensagens');
             const div = document.createElement('div');
@@ -520,14 +584,12 @@
             const pLower = pergunta.toLowerCase();
             let resposta = "";
 
-            if (pLower.includes('gastar') || pLower.includes('dia') || pLower.includes('quanto') || pLower.includes('por dia')) {
-                resposta = `Caio, considerando seu saldo livre atual de ${formatarMoeda(t.saldo)} e os ${diasBase} dias restantes até o próximo recebimento, você pode gastar cerca de ${formatarMoeda(gastoDiario)} por dia.`;
-            } else if (pLower.includes('fixo') || pLower.includes('conta')) {
-                resposta = `Seus gastos fixos somam ${formatarMoeda(t.totalFixos)} por mês, divididos em ${estado.fixos.length} compromissos cadastrados.`;
-            } else if (pLower.includes('saldo') || pLower.includes('sobra') || pLower.includes('disponível')) {
-                resposta = `Sua renda é ${formatarMoeda(estado.renda)}, os fixos são ${formatarMoeda(t.totalFixos)} e os variáveis são ${formatarMoeda(t.totalVariavel)}. Sobram ${formatarMoeda(t.saldo)} livres.`;
+            if (pLower.includes('gastar') || pLower.includes('dia') || pLower.includes('quanto')) {
+                resposta = `Caio, considerando seu saldo livre de ${formatarMoeda(t.saldo)}, você pode gastar cerca de ${formatarMoeda(gastoDiario)} por dia.`;
+            } else if (pLower.includes('fixo') || pLower.includes('conta') || pLower.includes('dívida') || pLower.includes('divida')) {
+                resposta = `Você tem ${estado.fixos.length} dívidas fixas cadastradas, somando ${formatarMoeda(t.totalFixos)} por mês. Toque em qualquer dia do calendário na aba Resumo para ver os detalhes da data!`;
             } else {
-                resposta = `Com saldo livre de ${formatarMoeda(t.saldo)}, sua média de gasto diário recomendada é de ${formatarMoeda(gastoDiario)}.`;
+                resposta = `Com saldo livre de ${formatarMoeda(t.saldo)}, sua média diária é de ${formatarMoeda(gastoDiario)}.`;
             }
 
             if (estado.apiKey) {
@@ -537,7 +599,7 @@
                         headers: { 'Authorization': `Bearer ${estado.apiKey}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             model: 'llama-3.3-70b-versatile',
-                            messages: [{ role: 'system', content: 'Você é um assistente financeiro direto e objetivo.' }, { role: 'user', content: pergunta }]
+                            messages: [{ role: 'system', content: 'Você é um assistente financeiro direto.' }, { role: 'user', content: pergunta }]
                         })
                     });
                     const data = await res.json();
@@ -570,7 +632,7 @@
 
         const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
         function alternarMicrofone() {
-            if (!Reconhecimento) return alert('Reconhecimento de voz não suportado.');
+            if (!Reconhecimento) return alert('Reconhecimento não suportado.');
             const rec = new Reconhecimento();
             rec.lang = 'pt-BR';
             rec.onresult = e => { document.getElementById('input-pergunta-ia').value = e.results[0][0].transcript; enviarMensagemIA(); };
