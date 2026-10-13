@@ -242,14 +242,14 @@
         </div>
     </div>
 
-    <!-- Modal Fixo (Dívida) -->
+    <!-- Modal Fixo -->
     <div id="modal-fixo" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center">
                 <h3 class="font-bold text-base text-slate-200">Nova Dívida / Gasto Fixo</h3>
                 <button onclick="fecharModalGastoFixo()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <input type="text" id="fixo-desc" placeholder="Nome da Dívida (Ex: Aluguel, Cartão)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+            <input type="text" id="fixo-desc" placeholder="Nome da Dívida (Ex: Aluguel)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div class="grid grid-cols-2 gap-3">
                 <input type="number" id="fixo-valor" step="0.01" placeholder="Valor R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
                 <input type="number" id="fixo-dia" min="1" max="31" placeholder="Dia do Vencimento" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
@@ -277,7 +277,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v9';
+        const STORAGE_KEY = 'meu-bolso-ai-v10';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
@@ -424,19 +424,29 @@
             renderizarCalendario();
         }
 
-        // Interação ao clicar no dia do calendário
+        // Interação ao clicar no dia do calendário (Lê tanto Fixos quanto Variáveis daquela data)
         function clicarDiaCalendario(dia, ano, mes) {
             const nomeMes = new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month: 'long' });
-            const dividasDoDia = estado.fixos.filter(f => f.dia === dia);
+            
+            // Procura gastos fixos que vencem nesse dia
+            const fixosDoDia = estado.fixos.filter(f => f.dia === dia);
+            
+            // Procura transações variáveis cadastradas exatamente nesta data (YYYY-MM-DD)
+            const mesStr = String(mes + 1).padStart(2, '0');
+            const diaStr = String(dia).padStart(2, '0');
+            const dataIsoAlvo = `${ano}-${mesStr}-${diaStr}`;
+            const variaveisDoDia = estado.transacoes.filter(t => t.data === dataIsoAlvo);
+
+            const todasDividas = [...fixosDoDia, ...variaveisDoDia];
             
             const titulo = document.getElementById('modal-dia-titulo');
             const conteudo = document.getElementById('modal-dia-conteudo');
             
             titulo.textContent = `${dia} de ${nomeMes} de ${ano}`;
 
-            if (dividasDoDia.length > 0) {
-                let html = `<p class="text-amber-400 font-semibold mb-2">Você tem ${dividasDoDia.length} dívida(s) nesta data:</p>`;
-                dividasDoDia.forEach(d => {
+            if (todasDividas.length > 0) {
+                let html = `<p class="text-amber-400 font-semibold mb-2">Você tem ${todasDividas.length} registro(s) nesta data:</p>`;
+                todasDividas.forEach(d => {
                     html += `<div class="bg-slate-800 p-2.5 rounded-xl mb-1 flex justify-between items-center">
                         <span class="text-slate-200 font-medium">${escaparHtml(d.desc)}</span>
                         <span class="text-amber-400 font-bold">${formatarMoeda(d.valor)}</span>
@@ -447,6 +457,7 @@
                 conteudo.innerHTML = `<p class="text-emerald-400 font-medium py-3"><i class="fa-solid fa-circle-check text-lg mb-1 block"></i>Você não tem dívidas nessa data.</p>`;
             }
 
+            document.getElementById('modal-dia').classList.add('flex');
             document.getElementById('modal-dia').classList.remove('hidden');
         }
 
@@ -458,10 +469,22 @@
             const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
             const primeiroDiaSemana = new Date(ano, mes, 1).getDay();
             
+            // Mapeia dias com dívidas fixas
             const diasComDivida = {};
             estado.fixos.forEach(f => {
                 if (f.dia) {
                     diasComDivida[f.dia] = (diasComDivida[f.dia] || 0) + 1;
+                }
+            });
+
+            // Mapeia dias com gastos variáveis no mês visualizado
+            const mesStr = String(mes + 1).padStart(2, '0');
+            estado.transacoes.forEach(t => {
+                if (t.data) {
+                    const [tAno, tMes, tDia] = t.data.split('-').map(Number);
+                    if (tAno === ano && tMes === mes + 1) {
+                        diasComDivida[tDia] = (diasComDivida[tDia] || 0) + 1;
+                    }
                 }
             });
 
@@ -476,12 +499,12 @@
                 if (ehHoje) {
                     classes += 'bg-emerald-500 text-slate-950 font-bold shadow-md ';
                 } else if (temDivida) {
-                    classes += 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-semibold hover:bg-amber-500/30 ';
+                    classes += 'bg-amber-500/25 border border-amber-500/50 text-amber-300 font-semibold hover:bg-amber-500/35 ';
                 } else {
                     classes += 'bg-slate-800/40 text-slate-300 hover:bg-slate-700/60 ';
                 }
 
-                const indicador = temDivida ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5"></span>` : `<span class="h-1.5 mt-0.5"></span>`;
+                const indicador = temDivida ? `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5 shadow"></span>` : `<span class="h-1.5 mt-0.5"></span>`;
                 html += `<div onclick="clicarDiaCalendario(${dia}, ${ano}, ${mes})" class="${classes}"><span>${dia}</span>${indicador}</div>`;
             }
             document.getElementById('grade-calendario').innerHTML = html;
@@ -587,7 +610,7 @@
             if (pLower.includes('gastar') || pLower.includes('dia') || pLower.includes('quanto')) {
                 resposta = `Caio, considerando seu saldo livre de ${formatarMoeda(t.saldo)}, você pode gastar cerca de ${formatarMoeda(gastoDiario)} por dia.`;
             } else if (pLower.includes('fixo') || pLower.includes('conta') || pLower.includes('dívida') || pLower.includes('divida')) {
-                resposta = `Você tem ${estado.fixos.length} dívidas fixas cadastradas, somando ${formatarMoeda(t.totalFixos)} por mês. Toque em qualquer dia do calendário na aba Resumo para ver os detalhes da data!`;
+                resposta = `Você tem ${estado.fixos.length} dívidas fixas cadastradas, somando ${formatarMoeda(t.totalFixos)} por mês. Toque em qualquer dia do calendário para ver os detalhes!`;
             } else {
                 resposta = `Com saldo livre de ${formatarMoeda(t.saldo)}, sua média diária é de ${formatarMoeda(gastoDiario)}.`;
             }
