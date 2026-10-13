@@ -139,7 +139,7 @@
             </div>
         </section>
 
-        <!-- ABA 4: COFRINHO -->
+        <!-- ABA 4: COFRINHO & INVESTIMENTOS -->
         <section id="tab-cofrinho" class="space-y-6 hidden">
             <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-xl space-y-3">
                 <div class="flex justify-between items-start">
@@ -215,7 +215,7 @@
             </div>
         </section>
 
-        <!-- ABA 6: IA -->
+        <!-- ABA 6: IA PROFISSIONAL -->
         <section id="tab-ia" class="space-y-3 hidden flex flex-col h-[75vh]">
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex items-center space-x-3 shrink-0">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
@@ -223,7 +223,7 @@
                 </div>
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Assistente Inteligente AI</h3>
-                    <p class="text-xs text-slate-400">Analisa o mês selecionado no calendário.</p>
+                    <p class="text-xs text-slate-400">Análise financeira avançada com IA</p>
                 </div>
                 <button onclick="alternarVoz()" id="btn-voz" title="Ativar/Desativar Voz" class="ml-auto w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 transition">
                     <i id="icone-voz" class="fa-solid fa-volume-xmark text-sm"></i>
@@ -232,12 +232,12 @@
 
             <div id="chat-mensagens" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-3xl p-4 overflow-y-auto space-y-3 hide-scrollbar flex flex-col">
                 <div class="bg-slate-800/80 text-slate-200 text-xs p-3.5 rounded-2xl max-w-[85%] self-start leading-relaxed">
-                    Olá, Caio! Já estou sincronizada com o mês que você selecionar no calendário. Pode perguntar!
+                    Olá, Caio! Sou seu consultor financeiro inteligente. Pergunte qualquer coisa sobre seu orçamento, metas ou investimentos!
                 </div>
             </div>
 
             <div class="flex items-center space-x-2 shrink-0 pt-2">
-                <input type="text" id="input-pergunta-ia" placeholder="Ex: Em dezembro posso gastar 1000 com roupas?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                <input type="text" id="input-pergunta-ia" placeholder="Ex: Quanto devo guardar por mês para minha meta?" class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
                 <button onclick="alternarMicrofone()" id="btn-microfone" class="w-12 h-12 shrink-0 bg-slate-800 text-slate-200 rounded-2xl flex items-center justify-center">
                     <i class="fa-solid fa-microphone text-sm"></i>
                 </button>
@@ -375,7 +375,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v15';
+        const STORAGE_KEY = 'meu-bolso-ai-v16';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
@@ -781,7 +781,7 @@
             renderizarCofrinho();
         }
 
-        // ---------- IA CORRIGIDA (Lê o mês atualmente selecionado no calendário) ----------
+        // ---------- IA 100% RESPONSÁVEL E INTELIGENTE ----------
         function adicionarMensagem(texto, doUsuario) {
             const chat = document.getElementById('chat-mensagens');
             const div = document.createElement('div');
@@ -799,49 +799,20 @@
             adicionarMensagem(pergunta, true);
             input.value = '';
 
-            const pLower = pergunta.toLowerCase();
-            
-            // Detecta se o usuário especificou um mês na pergunta (ex: "em dezembro", "em outubro")
-            let anoAlvo = dataVisualizacaoCalendario.getFullYear();
-            let mesAlvo = dataVisualizacaoCalendario.getMonth() + 1;
+            const ano = dataVisualizacaoCalendario.getFullYear();
+            const mesVis = dataVisualizacaoCalendario.getMonth() + 1;
+            const nomeMes = dataVisualizacaoCalendario.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const totais = calcularTotaisMes(ano, mesVis);
 
-            if (pLower.includes('janeiro')) mesAlvo = 1;
-            else if (pLower.includes('fevereiro')) mesAlvo = 2;
-            else if (pLower.includes('março')) mesAlvo = 3;
-            else if (pLower.includes('abril')) mesAlvo = 4;
-            else if (pLower.includes('maio')) mesAlvo = 5;
-            else if (pLower.includes('junho')) mesAlvo = 6;
-            else if (pLower.includes('julho')) mesAlvo = 7;
-            else if (pLower.includes('agosto')) mesAlvo = 8;
-            else if (pLower.includes('setembro')) mesAlvo = 9;
-            else if (pLower.includes('outubro')) mesAlvo = 10;
-            else if (pLower.includes('novembro')) mesAlvo = 11;
-            else if (pLower.includes('dezembro')) mesAlvo = 12;
-
-            const nomeMesStr = new Date(anoAlvo, mesAlvo - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-            const totais = calcularTotaisMes(anoAlvo, mesAlvo);
-
-            let resposta = "";
-            if (pLower.includes('gastar') || pLower.includes('roupas') || pLower.includes('posso') || pLower.includes('comprar')) {
-                const valorCitadoMatch = pergunta.match(/\d+([.,]\d+)?/);
-                const valorCitado = valorCitadoMatch ? parseFloat(valorCitadoMatch[0].replace(',', '.')) : 0;
-
-                if (valorCitado > 0) {
-                    if (totais.saldo >= valorCitado) {
-                        resposta = `Sim! Em ${nomeMesStr} seu saldo livre estimado é de ${formatarMoeda(totais.saldo)}. Portanto, você pode gastar ${formatarMoeda(valorCitado)} e ainda fechará o mês no positivo com ${formatarMoeda(totais.saldo - valorCitado)}.`;
-                    } else {
-                        resposta = `Cuidado! Em ${nomeMesStr} seu saldo livre estimado é de ${formatarMoeda(totais.saldo)}. Gastar ${formatarMoeda(valorCitado)} deixará você no vermelho (faltariam ${formatarMoeda(valorCitado - totais.saldo)}).`;
-                    }
-                } else {
-                    resposta = `No mês de ${nomeMesStr}, sua renda é ${formatarMoeda(totais.rendaTotalMes)}, com dívidas de ${formatarMoeda(totais.totalFixos)} e saldo livre de ${formatarMoeda(totais.saldo)}.`;
-                }
-            } else {
-                resposta = `Para ${nomeMesStr}: Renda total ${formatarMoeda(totais.rendaTotalMes)}, Dívidas fixas ${formatarMoeda(totais.totalFixos)}, Gastos variáveis ${formatarMoeda(totais.totalVariavel)} e Saldo livre de ${formatarMoeda(totais.saldo)}.`;
-            }
-
+            // Se o usuário tiver chave da API, usa o modelo avançado com o banco de dados do app
             if (estado.apiKey) {
                 try {
-                    const contexto = `Assistente financeiro do Caio. Dados de ${nomeMesStr}: Renda R$ ${totais.rendaTotalMes.toFixed(2)}, Fixos R$ ${totais.totalFixos.toFixed(2)}, Saldo livre R$ ${totais.saldo.toFixed(2)}. Responda de forma direta e coerente.`;
+                    const contexto = `Você é um consultor financeiro pessoal especialista, empático e extremamente inteligente. 
+                    Caio está consultando o mês de ${nomeMes}. 
+                    Dados financeiros atuais para este mês: Renda Total = R$ ${totais.rendaTotalMes.toFixed(2)}, Dívidas Fixas = R$ ${totais.totalFixos.toFixed(2)}, Gastos Variáveis = R$ ${totais.totalVariavel.toFixed(2)}, Saldo Livre Disponível = R$ ${totais.saldo.toFixed(2)}, Aporte em Investimentos = R$ ${estado.aporte}. 
+                    Metas cadastradas: ${JSON.stringify(estado.metas)}.
+                    Responda à pergunta do Caio de forma natural, direta, detalhada e coerente, exatamente como um consultor humano faria.`;
+
                     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${estado.apiKey}`, 'Content-Type': 'application/json' },
@@ -858,7 +829,20 @@
                 } catch (e) { console.error(e); }
             }
 
-            setTimeout(() => { adicionarMensagem(resposta, false); }, 400);
+            // Resposta inteligente local estruturada caso não tenha API key
+            setTimeout(() => {
+                let resposta = "";
+                const pLower = pergunta.toLowerCase();
+                
+                if (pLower.includes('carro') || pLower.includes('meta') || pLower.includes('guardar')) {
+                    resposta = `Para atingir uma meta em 12 meses, o ideal é dividir o valor total da meta por 12 para saber o aporte mensal necessário. Por exemplo, se o seu objetivo custa R$ 12.000, você precisará guardar R$ 1.000 por mês. Como seu saldo livre em ${nomeMes} é de ${formatarMoeda(totais.saldo)}, verifique se esse valor cabe no seu orçamento ou ajuste o prazo!`;
+                } else if (pLower.includes('gastar') || pLower.includes('comprar') || pLower.includes('posso')) {
+                    resposta = `Analisando o mês de ${nomeMes}, sua renda é ${formatarMoeda(totais.rendaTotalMes)} e suas dívidas somam ${formatarMoeda(totais.totalFixos)}, deixando um saldo livre de ${formatarMoeda(totais.saldo)}. Certifique-se de que qualquer compra se encaixe nesse valor para não fechar o mês no vermelho!`;
+                } else {
+                    resposta = `No mês de ${nomeMes}, você tem uma renda total de ${formatarMoeda(totais.rendaTotalMes)}, com ${formatarMoeda(totais.totalFixos)} em dívidas fixas e um saldo livre de ${formatarMoeda(totais.saldo)}. Como posso te ajudar a otimizar suas finanças hoje?`;
+                }
+                adicionarMensagem(resposta, false);
+            }, 400);
         }
 
         function falar(texto) {
@@ -876,15 +860,6 @@
             const icone = document.getElementById('icone-voz');
             icone.className = 'fa-solid text-sm ' + (estado.vozAtiva ? 'fa-volume-high text-emerald-400' : 'fa-volume-xmark text-slate-400');
             if (estado.vozAtiva) falar('Voz ativada.');
-        }
-
-        const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
-        function alternarMicrofone() {
-            if (!Reconhecimento) return alert('Reconhecimento não suportado.');
-            const rec = new Reconhecimento();
-            rec.lang = 'pt-BR';
-            rec.onresult = e => { document.getElementById('input-pergunta-ia').value = e.results[0][0].transcript; enviarMensagemIA(); };
-            rec.start();
         }
 
         document.getElementById('select-banco').value = estado.banco;
