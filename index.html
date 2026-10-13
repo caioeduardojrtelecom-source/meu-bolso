@@ -115,7 +115,7 @@
                 <span>Adicionar Gasto Variável</span>
             </button>
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg space-y-4">
-                <h3 class="font-bold text-sm text-slate-300">Extrato do Mês</h3>
+                <h3 class="font-bold text-sm text-slate-300">Extrato de Gastos Variáveis</h3>
                 <div id="lista-extrato" class="space-y-3 max-h-96 overflow-y-auto hide-scrollbar">
                     <div class="text-center py-8 text-slate-500 text-sm">Nenhuma transação registrada.</div>
                 </div>
@@ -207,9 +207,12 @@
 
     <!-- Modal Transação -->
     <div id="modal-transacao" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4">
-            <h3 class="font-bold text-base text-slate-200">Novo Gasto Variável</h3>
-            <input type="text" id="trans-desc" placeholder="Descrição" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Novo Gasto Variável</h3>
+                <button onclick="fecharModalTransacao()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="text" id="trans-desc" placeholder="Descrição (Ex: Mercado)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div class="grid grid-cols-2 gap-3">
                 <input type="number" id="trans-valor" step="0.01" placeholder="Valor R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
                 <input type="date" id="trans-data" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200">
@@ -220,32 +223,38 @@
                 <option value="Lazer">Lazer</option>
                 <option value="Outros">Outros</option>
             </select>
-            <button onclick="salvarTransacao()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar</button>
+            <button onclick="salvarTransacao()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Gasto</button>
         </div>
     </div>
 
     <!-- Modal Fixo -->
     <div id="modal-fixo" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4">
-            <h3 class="font-bold text-base text-slate-200">Novo Gasto Fixo</h3>
-            <input type="text" id="fixo-desc" placeholder="Descrição" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Novo Gasto Fixo</h3>
+                <button onclick="fecharModalGastoFixo()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="text" id="fixo-desc" placeholder="Descrição (Ex: Aluguel)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div class="grid grid-cols-2 gap-3">
                 <input type="number" id="fixo-valor" step="0.01" placeholder="Valor R$" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
                 <input type="number" id="fixo-dia" min="1" max="31" placeholder="Dia Venc." class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             </div>
-            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar</button>
+            <button onclick="salvarGastoFixo()" class="w-full bg-amber-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar Fixo</button>
         </div>
     </div>
 
     <!-- Modal Configurações -->
     <div id="modal-config" class="fixed inset-0 bg-slate-950/80 z-50 hidden flex items-end sm:items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4">
-            <h3 class="font-bold text-base text-slate-200">Configurações & Chave API</h3>
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-200">Configurações & Chave API</h3>
+                <button onclick="fecharConfiguracoes()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
             <input type="text" id="config-nome" placeholder="Seu Nome" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <input type="number" id="config-renda" placeholder="Renda Mensal R$" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <input type="number" id="config-dia-pagamento" placeholder="Dia do Pagamento" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200">
             <div>
-                <label class="text-xs text-amber-400">Chave API Groq (Opcional - para IA Avançada)</label>
+                <label class="text-xs text-amber-400">Chave API Groq (Opcional - para IA)</label>
                 <input type="password" id="config-api-key" placeholder="gsk_..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 mt-1">
             </div>
             <button onclick="salvarConfiguracoes()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-2xl">Salvar</button>
@@ -253,7 +262,7 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'meu-bolso-ai-v6';
+        const STORAGE_KEY = 'meu-bolso-ai-v7';
         let estado = carregarEstado();
         let grafico = null;
         let dataVisualizacaoCalendario = new Date();
@@ -269,10 +278,36 @@
         function salvarEstado() { localStorage.setItem(STORAGE_KEY, JSON.stringify(estado)); }
         function formatarMoeda(valor) { return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
         function escaparHtml(texto) { const div = document.createElement('div'); div.textContent = texto; return div.innerHTML; }
-        function hojeIso() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+        function hojeIso() {
+            const d = new Date();
+            return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        }
 
-        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
+        // Funções de Modais
+        function abrirModalTransacao() {
+            document.getElementById('trans-desc').value = '';
+            document.getElementById('trans-valor').value = '';
+            document.getElementById('trans-data').value = hojeIso();
+            document.getElementById('modal-transacao').classList.remove('hidden');
+        }
+        function fecharModalTransacao() { document.getElementById('modal-transacao').classList.add('hidden'); }
+
+        function abrirModalGastoFixo() {
+            document.getElementById('fixo-desc').value = '';
+            document.getElementById('fixo-valor').value = '';
+            document.getElementById('fixo-dia').value = '';
+            document.getElementById('modal-fixo').classList.remove('hidden');
+        }
+        function fecharModalGastoFixo() { document.getElementById('modal-fixo').classList.add('hidden'); }
+
+        function abrirConfiguracoes() {
+            document.getElementById('config-nome').value = estado.nome || '';
+            document.getElementById('config-renda').value = estado.renda || '';
+            document.getElementById('config-dia-pagamento').value = estado.diaPagamento || '';
+            document.getElementById('config-api-key').value = estado.apiKey || '';
+            document.getElementById('modal-config').classList.remove('hidden');
+        }
+        function fecharConfiguracoes() { document.getElementById('modal-config').classList.add('hidden'); }
 
         function calcularTotais() {
             const hoje = new Date();
@@ -319,10 +354,10 @@
             const valor = parseFloat(document.getElementById('trans-valor').value);
             const data = document.getElementById('trans-data').value || hojeIso();
             const categoria = document.getElementById('trans-categoria').value;
-            if (!desc || !(valor > 0)) return alert('Preencha os campos corretamente.');
+            if (!desc || !(valor > 0)) { alert('Preencha a descrição e um valor válido.'); return; }
             estado.transacoes.push({ id: Date.now(), desc, valor, data, categoria });
             salvarEstado();
-            fecharModal('modal-transacao');
+            fecharModalTransacao();
             renderizarTudo();
         }
 
@@ -336,10 +371,10 @@
             const desc = document.getElementById('fixo-desc').value.trim();
             const valor = parseFloat(document.getElementById('fixo-valor').value);
             const dia = parseInt(document.getElementById('fixo-dia').value, 10);
-            if (!desc || !(valor > 0)) return alert('Preencha os campos corretamente.');
+            if (!desc || !(valor > 0)) { alert('Preencha a descrição e um valor válido.'); return; }
             estado.fixos.push({ id: Date.now(), desc, valor, dia: dia || null });
             salvarEstado();
-            fecharModal('modal-fixo');
+            fecharModalGastoFixo();
             renderizarTudo();
         }
 
@@ -355,14 +390,7 @@
             estado.meses = parseInt(document.getElementById('input-meses').value, 10) || 0;
             salvarEstado();
             renderizarResumo();
-        }
-
-        function abrirConfiguracoes() {
-            document.getElementById('config-nome').value = estado.nome || '';
-            document.getElementById('config-renda').value = estado.renda || '';
-            document.getElementById('config-dia-pagamento').value = estado.diaPagamento || '';
-            document.getElementById('config-api-key').value = estado.apiKey || '';
-            abrirModal('modal-config');
+            renderizarCofrinho();
         }
 
         function salvarConfiguracoes() {
@@ -371,7 +399,7 @@
             estado.diaPagamento = parseInt(document.getElementById('config-dia-pagamento').value, 10) || null;
             estado.apiKey = document.getElementById('config-api-key').value.trim();
             salvarEstado();
-            fecharModal('modal-config');
+            fecharConfiguracoes();
             renderizarTudo();
         }
 
@@ -466,7 +494,7 @@
             renderizarCofrinho();
         }
 
-        // ---------- Assistente Inteligente & IA Real ----------
+        // IA
         function adicionarMensagem(texto, doUsuario) {
             const chat = document.getElementById('chat-mensagens');
             const div = document.createElement('div');
@@ -485,7 +513,7 @@
             input.value = '';
 
             const t = calcularTotais();
-            const contexto = `Você é o assistente financeiro do Caio. Dados atuais: Renda R$ ${estado.renda}, Gastos Fixos R$ ${t.totalFixos}, Gastos Variáveis R$ ${t.totalVariavel}, Saldo disponível R$ ${t.saldo}, Cofrinho aporte mensal R$ ${estado.aporte}. Responda em português de forma clara, direta e útil.`;
+            const contexto = `Você é o assistente financeiro do Caio. Dados atuais: Renda R$ ${estado.renda}, Gastos Fixos R$ ${t.totalFixos}, Gastos Variáveis R$ ${t.totalVariavel}, Saldo disponível R$ ${t.saldo}. Responda em português de forma clara e direta.`;
 
             if (estado.apiKey) {
                 try {
@@ -505,22 +533,12 @@
                 } catch (e) { console.error(e); }
             }
 
-            // Resposta inteligente local integrada caso não tenha API key configurada
             setTimeout(() => {
-                let resp = "";
-                const p = pergunta.toLowerCase();
-                if (p.includes('gastar') || p.includes('saldo') || p.includes('quanto')) {
-                    resp = `Caio, sua renda é ${formatarMoeda(estado.renda)}, os fixos somam ${formatarMoeda(t.totalFixos)} e os variáveis ${formatarMoeda(t.totalVariavel)}. Seu saldo livre atual é de ${formatarMoeda(t.saldo)}.`;
-                } else if (p.includes('fixo') || p.includes('conta')) {
-                    resp = `Você tem ${estado.fixos.length} gastos fixos cadastrados, totalizando ${formatarMoeda(t.totalFixos)} mensais.`;
-                } else {
-                    resp = `Entendido! Com saldo livre de ${formatarMoeda(t.saldo)}, mantenha o foco na sua meta de economia.`;
-                }
+                let resp = `Caio, sua renda é ${formatarMoeda(estado.renda)}, os fixos somam ${formatarMoeda(t.totalFixos)} e os variáveis ${formatarMoeda(t.totalVariavel)}. Seu saldo livre atual é de ${formatarMoeda(t.saldo)}.`;
                 adicionarMensagem(resp, false);
             }, 400);
         }
 
-        // ---------- Áudio Corrigido ----------
         function falar(texto) {
             if (!estado.vozAtiva || !('speechSynthesis' in window)) return;
             speechSynthesis.cancel();
@@ -535,12 +553,12 @@
             salvarEstado();
             const icone = document.getElementById('icone-voz');
             icone.className = 'fa-solid text-sm ' + (estado.vozAtiva ? 'fa-volume-high text-emerald-400' : 'fa-volume-xmark text-slate-400');
-            if (estado.vozAtiva) falar('Voz ativada com sucesso.');
+            if (estado.vozAtiva) falar('Voz ativada.');
         }
 
         const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
         function alternarMicrofone() {
-            if (!Reconhecimento) return alert('Reconhecimento de voz não suportado neste navegador.');
+            if (!Reconhecimento) return alert('Reconhecimento de voz não suportado.');
             const rec = new Reconhecimento();
             rec.lang = 'pt-BR';
             rec.onresult = e => { document.getElementById('input-pergunta-ia').value = e.results[0][0].transcript; enviarMensagemIA(); };
